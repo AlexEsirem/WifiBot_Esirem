@@ -1,34 +1,30 @@
 #ifndef SENSORDATA_H
 #define SENSORDATA_H
 
+/**
+ * @brief The SensorData class
+ * Cette classe offre une structure qui permet d'enregistrer les données reçues des capteurs du robot dans un seul objet.
+ */
 class SensorData
 {
 public:
     SensorData();
     int getTensionBatterie() const;
     void setTensionBatterie(int value);
-
     int getVitesseAvantGauche() const;
     void setVitesseAvantGauche(int value);
-
     int getVitesseArriereGauche() const;
     void setVitesseArriereGauche(int value);
-
     int getVitesseArriereDroit() const;
     void setVitesseArriereDroit(int value);
-
     int getVitesseAvantDroit() const;
     void setVitesseAvantDroit(int value);
-
     int getIRgauche() const;
     void setIRgauche(int value);
-
     int getIRdroit() const;
     void setIRdroit(int value);
-
     long getOdometrieGauche() const;
     void setOdometrieGauche(long value);
-
     long getOdometrieDroite() const;
     void setOdometrieDroite(long value);
 

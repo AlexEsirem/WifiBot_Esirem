@@ -1,5 +1,4 @@
 
-
 #include <QGridLayout>
 #include <QMessageBox>
 
@@ -7,6 +6,11 @@
 #include "dialconnexion.h"
 #include "fenetreprincipale.h"
 
+/**
+ * @brief DialConnexion::DialConnexion
+ * Instancie la fenêtre de connexion.
+ *
+ */
 DialConnexion::DialConnexion() : QWidget()
 {
     this->setWindowTitle("Connexion au robot");
@@ -14,7 +18,7 @@ DialConnexion::DialConnexion() : QWidget()
     ip = "";
     port = -1;
 
-    // Creation ddes elements :
+    // Creation ddes elements graphiques :
     labelChoixIP = new QLabel(this);
     labelChoixPort = new QLabel(this);
 
@@ -26,9 +30,10 @@ DialConnexion::DialConnexion() : QWidget()
     boutonOK = new QPushButton(this);
     boutonQuitter = new QPushButton(this);
 
+    // Layout : "mise en page" des différents éléments sous forme de "grille"
     QGridLayout *layoutGrid = new QGridLayout;
 
-    // Donnees des elements :
+    // Donnees des elements graphiques:
     labelChoixIP->setText("IP");
     labelChoixPort->setText("Port");
     boutonSimulateur->setText("Simulateur");
@@ -36,6 +41,7 @@ DialConnexion::DialConnexion() : QWidget()
     boutonOK->setText("OK");
     boutonQuitter->setText("Quitter");
 
+    // Ajout des éléments au layout :
     layoutGrid->addWidget(labelChoixIP, 0,0);
     layoutGrid->addWidget(champIP, 0,1,1,2);
     layoutGrid->addWidget(labelChoixPort, 1,0);
@@ -45,15 +51,28 @@ DialConnexion::DialConnexion() : QWidget()
     layoutGrid->addWidget(boutonQuitter, 3, 0);
     layoutGrid->addWidget(boutonOK, 3, 2);
 
+    // application du layout à cette fenêtre :
     this->setLayout(layoutGrid);
 
-    // Liaison entre les boutons et les actions :
+    /* Liaison entre les boutons de l'interface et les actions à effectuer :
+     * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
     QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(close()));
     QObject::connect(boutonOK, SIGNAL(clicked()), this, SLOT(boutonOKClicked()));
     QObject::connect(boutonSimulateur, SIGNAL(clicked()), this, SLOT(boutonSimulateurClicked()));
     QObject::connect(boutonReel, SIGNAL(clicked()), this, SLOT(boutonReelClicked()));
 }
 
+/************************************
+ * SLOTS :
+ ************************************/
+
+/**
+ * @brief DialConnexion::boutonOKClicked
+ * Slot appelé lorsque l'utilisateur clique sur le bouton "Ok".
+ * Vérifie la validité des données (champs non vides).
+ * Si non valides, on affiche un message d'erreur.
+ * Si valides, on ferme cette fenetre et on lance le programme principal en créant et affichant une FenetrePrincipale.
+ */
 void DialConnexion::boutonOKClicked()
 {
     if(champIP->text().isEmpty() && champPort->text().toInt(0, 10) == 0)
@@ -85,12 +104,22 @@ void DialConnexion::boutonOKClicked()
     }
 }
 
+/**
+ * @brief DialConnexion::boutonReelClicked
+ * Slot appelé lorsque l'utilisateur clique sur le bouton "Robot".
+ * Remplit les champs IP et port avec les données correspondant au robot.
+ */
 void DialConnexion::boutonReelClicked()
 {
     champIP->setText(IP_REEL);
     champPort->setText(QString::number(PORT_REEL, 10));
 }
 
+/**
+ * @brief DialConnexion::boutonSimulateurClicked
+ * Slot appelé lorsque l'utilisateur clique sur le bouton "Simulateur".
+ * Remplit les champs IP et port avec les données correspondant au simulateur.
+ */
 void DialConnexion::boutonSimulateurClicked()
 {
     champIP->setText(IP_SIMULATEUR);

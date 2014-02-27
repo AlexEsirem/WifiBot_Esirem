@@ -6,33 +6,41 @@
 #include "fenetreprincipale.h"
 #include "Const.h"
 
+/* L'entier commande est utilisé en global.
+ * Il est partagé entre la FenetrePrincipale qui le modifiera en fonction des
+ * actions de l'utilisateur, et le threadCommunication qui lira sa valeur pour savoir
+ * quelles instructions envoyer au robot. */
 int commande;
 
+
+/**
+ * @brief FenetrePrincipale::FenetrePrincipale
+ * @param ipRobot
+ * @param portRobot
+ * Instancie une fenetre principale avec les données de connexions choisies par l'utilisateur, transmises par le
+ * dialogue de connexion.
+ * Créé et lance le thread de communication.
+ */
 FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 {
     this->setWindowTitle("WifiBot Control");
 
+    /* Initialisation des elements de fonctionnement : */
+    commande = RIEN;    // initialement aucune commande n'est demandé, donc RIEN
     ip = ipRobot;
     port = portRobot;
 
-    /* Initialisation des elements de fonctionnement : */
-    commande = RIEN;
-
-    /* Lancement du thread de communication : */
+    /* Création et lancement du thread de communication : */
     tCommunication = new ThreadCommunication(ip, port);
-
-
     tCommunication->start();
 
-    /* Initialisation des flags des touchess clavier : */
+    /* Initialisation des flags des touchess clavier. On considère qu'aucune n'est appuyée au début. */
     keyUp = false;
     keyDown = false;
     keyLeft = false;
     keyRight = false;
 
-    /* Initialisation des elements graphiques : */
-
-    // Creation des elements :
+    /* Création des elements graphiques : */
     boutonAccelerer = new QPushButton(this);
     boutonFrein = new QPushButton(this);
     boutonGauche = new QPushButton(this);
@@ -53,7 +61,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
     boutonQuitter = new QPushButton(this);
 
-    // Donnees des elements :
+    /* Donnees des elements graphiques */
     boutonAccelerer->setText("Accelerer");
     boutonFrein->setText("Frein");
     boutonGauche->setText("Gauche");
@@ -86,11 +94,17 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     labelIRGauche->setText("Gauche :");
     labelIRDroit->setText("Droit :");
 
+    /* On utilisera 4 layouts :
+     * - Un principal qui contiendra tous les éléments
+     * - Un de droite qui contiendra les layouts commandes et data
+     * - un layout commandes qui regroupe les boutons
+     * - un layout data qui regroupe les éléments d'affichage des données des capteurs */
     QGridLayout *layoutCommandes = new QGridLayout;
     QGridLayout *layoutPrincipal = new QGridLayout;
     QGridLayout *layoutDroite = new QGridLayout;
     QGridLayout *layoutData = new QGridLayout;
 
+    /* Deux séparateurs pour l'esthétique */
     QFrame* separateurH1 = new QFrame(this);
     separateurH1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
     separateurH1->show();
@@ -99,6 +113,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     separateurH2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
     separateurH2->show();
 
+    /* Configuration des layout et ajout des éléments */
     layoutData->setVerticalSpacing(10);
     layoutData->setHorizontalSpacing(30);
 
@@ -129,9 +144,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
     layoutPrincipal->addLayout(layoutDroite, 0,1);
 
+    /* Application du layout à cette fenêtre */
     this->setLayout(layoutPrincipal);
 
-    // Liaison boutons avec les actions :
+    /* Liaison entre les boutons de l'interface et les actions à effectuer :
+     * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
     QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
     QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
     QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonReleased()));
@@ -142,7 +159,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     QObject::connect(boutonDroite, SIGNAL(pressed()), this, SLOT(boutonDroitePressed()));
     QObject::connect(boutonDroite, SIGNAL(released()), this, SLOT(boutonReleased()));
 
-    // Liaison de la modification des donnees du robot (thread communication) avec l'update des labels :
+    /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
     QObject::connect(tCommunication, SIGNAL(sensorDataChanged()), this, SLOT(updateDataLabels()));
 
 
