@@ -82,6 +82,8 @@ void ThreadCommunication::run(){
             int vitesseMax;
             int vGauche = 0;
             int vDroite = 0;
+            bool sGauche = false;
+            bool sDroite = false;
 
             if(ip==IP_REEL)
             {
@@ -90,7 +92,36 @@ void ThreadCommunication::run(){
 
                 vitesseMax = 240;
 
+                // calcul des vitesses vGauche et vDroite :
+                calculVitesses(&vGauche, &vDroite, vitesseMax);
+                // déterminaiton des sens sGauche et sDroite :
+                calculSens(&sGauche, &sDroite);
 
+                // Les deux premiers chars sont :
+                bufferEnvoi[0] = 255;
+                bufferEnvoi[1] = 0x07;
+
+                // Cote gauche :
+                bufferEnvoi[2] = 0; // vérifier à quoi sert celui-ci
+                bufferEnvoi[3] = (char)vGauche;
+                // Cote droit :
+                bufferEnvoi[4] = 0; // vérifier à quoi sert celui-ci
+                bufferEnvoi[5] = (char)vDroite;
+
+                // Définition du flag de commande :
+                int commandFlag = 0;
+                if(sGauche)
+                    commandFlag += 64;
+                if(sDroite)
+                    commandFlag += 16;
+                bufferEnvoi[6] = (char)commandFlag;
+
+                // Les deux derniers char sont les CRC :
+                bufferEnvoi[7] = 0;
+                bufferEnvoi[8] = 0;
+
+                // Envoi du message :
+                socket->write(bufferEnvoi, 9);
             }
             else
             {
@@ -107,50 +138,14 @@ void ThreadCommunication::run(){
 
                 // Calcul des vitesses vGauche et vDroite :
                 calculVitesses(&vGauche, &vDroite, vitesseMax);
+                // déterminaiton des sens sGauche et sDroite :
+                calculSens(&sGauche, &sDroite);
 
-                // il reste juste a ajouter 64 à cGauche ou cDroite si il faut avancer :
-                switch(commande)
-                {
-                case FREIN:
-                    if(sensPrecedent == EN_ARRIERE)
-                    {
-                        // alors on va en avant
-                        cGauche += 64;
-                        cDroite += 64;
-                    }
-                    break;
-
-                case AVANCER:
-                    // on indique le sens "en avant" en ajoutant 64
+                // il reste juste a ajouter 64 à cGauche ou cDroite en fonction de sGauche et sDroite :
+                if(sGauche)
                     cGauche += 64;
+                if(sDroite)
                     cDroite += 64;
-                    break;
-
-                case AVANT_GAUCHE:
-                    // on indique le sens "en avant" en ajoutant 64
-                    cGauche += 64;
-                    cDroite += 64;
-                    break;
-
-                case AVANT_DROIT:
-                    // on indique le sens "en avant" en ajoutant 64
-                    cGauche += 64;
-                    cDroite += 64;
-                    break;
-
-                case PIVOTER_GAUCHE:
-                    // Le coté gauche ira en arriere et le droit en avant
-                    cDroite += 64;
-                    break;
-
-                case PIVOTER_DROITE:
-                    // Le coté droite ira en arriere et le gauche en avant
-                    cGauche+= 64;
-                    break;
-
-                default:
-                    break;
-                }
 
                 // On ajoute les vitesses aux chars :
                 cGauche += vGauche;
@@ -159,6 +154,7 @@ void ThreadCommunication::run(){
                 bufferEnvoi[0] = (char)cGauche;
                 bufferEnvoi[1] = (char)cDroite;
 
+                // Envoi du message :
                 socket->write(bufferEnvoi, 2);
             }
             readData();
@@ -171,6 +167,51 @@ void ThreadCommunication::run(){
     // si le socket ne se ferme pas tout de suite on attend sa deconnexion 5 secondes max.
     if (socket->state() != QAbstractSocket::UnconnectedState)
         socket->waitForDisconnected(5000);
+}
+
+/**
+ * @brief ThreadCommunication::calculSens
+ * @param sGauche : pointeur sur le booleen sGauche
+ * @param sDroite : pointeur sur le booleen sGauche
+ * Détermine si le coté gauche et le coté droit avancent ou non.
+ * Si le coté avance, son booleen sX sera mis à true, sinon à false.
+ */
+void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
+{
+    switch(commande)
+    {
+    case FREIN:
+        if(sensPrecedent == EN_ARRIERE)
+        {
+            (*sGauche) = true;
+        }
+        break;
+
+    case AVANCER:
+        (*sGauche) = true;
+        break;
+
+    case AVANT_GAUCHE:
+        (*sGauche) = true;
+        break;
+
+    case AVANT_DROIT:
+        (*sGauche) = true;
+        break;
+
+    case PIVOTER_GAUCHE:
+        (*sGauche) = true;
+        break;
+
+    case PIVOTER_DROITE:
+        (*sGauche) = true;
+        break;
+
+    default:
+        (*sGauche) = false;
+        (*sDroite) = false;
+        break;
+    }
 }
 
 

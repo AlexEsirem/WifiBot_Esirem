@@ -31,6 +31,7 @@ public:
     ThreadCommunication(QString ipRobot, int portRobot);
     void run();
     void calculVitesses(int *vGauche, int *vDroite, int vMax);
+    void calculSens(bool *sGauche, bool *sDroite);
     int getConnecte();
     void terminate();
     SensorData *getCapteurs() const;
