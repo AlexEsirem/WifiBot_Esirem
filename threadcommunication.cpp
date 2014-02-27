@@ -45,10 +45,17 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
 
 }
 
+/**
+ * @brief ThreadCommunication::run
+ * Fonction exécutée lors du lancement du thread par appel à start().
+ * Tant que le booleen "termine" est faux, on effectue la boucle.
+ * Si le socket est bien connecté (on peut lire et ecrire dessus), on envoie
+ * la commande et puis on lit les données des capteurs.
+ */
 void ThreadCommunication::run(){
     while(!termine)
     {
-        if(connecte == 1)
+        if(socket->isWritable() && socket->isReadable())
         {
             if(ip==IP_REEL)
             {
@@ -240,6 +247,50 @@ void ThreadCommunication::run(){
                     vitessePrecedente = vitesse;
                     break;
 
+                case PIVOTER_GAUCHE:
+                    // le robot tourne sur lui-meme :
+                    if(sensChange())
+                    {
+                        // si le sens a change on met la vitesse à 5 (lent)
+                        vitesse = 5;
+                    }
+                    else
+                    {
+                        if(vitessePrecedente < 60)
+                            vitesse = vitessePrecedente + 1;
+                        else
+                            vitesse = vitessePrecedente;
+                    }
+                    // Le coté gauche ira en arriere et le droit en avant, avec la même vitesse :
+                    cDroite += 64;
+                    cDroite += vitesse;
+                    cGauche += vitesse;
+                    sensPrecedent = SUR_PLACE;
+                    vitessePrecedente = vitesse;
+                    break;
+
+                case PIVOTER_DROITE:
+                    // le robot tourne sur lui-meme :
+                    if(sensChange())
+                    {
+                        // si le sens a change on met la vitesse à 5 (lent)
+                        vitesse = 5;
+                    }
+                    else
+                    {
+                        if(vitessePrecedente < 60)
+                            vitesse = vitessePrecedente + 1;
+                        else
+                            vitesse = vitessePrecedente;
+                    }
+                    // Le coté droite ira en arriere et le gauche en avant, avec la même vitesse :
+                    cGauche+= 64;
+                    cGauche += vitesse;
+                    cDroite += vitesse;
+                    sensPrecedent = SUR_PLACE;
+                    vitessePrecedente = vitesse;
+                    break;
+
                 default:
                     break;
                 }
@@ -266,7 +317,7 @@ void ThreadCommunication::run(){
  * Determine si la commande actuelle entraine un changement de sens
  * par exemple on allait en avant et on demande de reculer.
  * Cela permet de savoir si on doit remettre la vitesse à 0,
- * ou si on augmente la vitesse précédente.
+ * ou si on augmente juste la vitesse précédente.
  * @return true si sens changé et false sinon
  */
 bool ThreadCommunication::sensChange()
@@ -276,22 +327,37 @@ bool ThreadCommunication::sensChange()
         if(commande == FREIN // on demande de freiner
             || commande == RECULER  // on demande de reculer
                 || commande == ARRIERE_GAUCHE
-                    ||commande == ARRIERE_DROIT)
+                    ||commande == ARRIERE_DROIT
+                        || commande == PIVOTER_DROITE
+                            || commande == PIVOTER_GAUCHE)
         {
             // alors le sens a change
             return true;
         }
     }
-    if(sensPrecedent == EN_ARRIERE)  // si on allait en arriere et que...
+    else if(sensPrecedent == EN_ARRIERE)  // si on allait en arriere et que...
     {
         if(commande == FREIN // on demande de freiner
                 || commande == AVANCER // on demande d'avancer
                     || commande == AVANT_DROIT
-                        || commande == AVANT_GAUCHE)
+                        || commande == AVANT_GAUCHE
+                            || commande == PIVOTER_DROITE
+                               || commande == PIVOTER_GAUCHE)
         {
             // alors le sens a change
             return true;
         }
+    }
+    else if(sensPrecedent == SUR_PLACE)
+    {
+        if(commande == FREIN
+                || commande == AVANCER
+                    || commande == AVANT_DROIT
+                      || commande == AVANT_GAUCHE
+                        || commande == RECULER
+                            || commande == ARRIERE_GAUCHE
+                                ||commande == ARRIERE_DROIT )
+            return true;
     }
     // dans les autres cas, le sens n'a pas change :
     return false;

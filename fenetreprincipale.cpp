@@ -249,16 +249,18 @@ void FenetrePrincipale::keyReleaseEvent(QKeyEvent *event)
  */
 void FenetrePrincipale::majCommandeFromFlags()
 {
-    // On applique les changements a la commande, en fonction des flags :
-    if(keyUp && !keyDown)   // si touche du haut appuyee mais pas celle du bas
+    /* On applique les changements a la commande, en fonction des flags */
+    // Si la touche du haut est enfoncée et pas celle du bas :
+    if(keyUp && !keyDown)
     {
-        if(keyLeft && !keyRight)    // avant gauche (droite non enfoncee)
+        if(keyLeft && !keyRight)
             commande = AVANT_GAUCHE;
         else if(keyRight && !keyLeft)
             commande = AVANT_DROIT;
         else
             commande = AVANCER;
     }
+    // Si la touche du bas est enfoncée et pas celle du haut :
     else if(keyDown && !keyUp)
     {
         if(keyLeft && !keyRight)
@@ -267,6 +269,16 @@ void FenetrePrincipale::majCommandeFromFlags()
             commande = ARRIERE_DROIT;
         else
             commande = RECULER;
+    }
+    // Si ni la touche de haut ni celle du bas ne sont enfoncée (le robot tourne sur lui-même) :
+    else if(!keyUp && !keyDown)
+    {
+        if(keyLeft && !keyRight)
+            commande = PIVOTER_GAUCHE;
+        else if(keyRight && !keyLeft)
+            commande = PIVOTER_DROITE;
+        else
+            commande = RIEN;
     }
     else
         commande = RIEN;

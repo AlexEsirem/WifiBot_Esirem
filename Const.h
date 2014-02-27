@@ -23,9 +23,12 @@
 #define AVANT_DROIT 5
 #define ARRIERE_GAUCHE 6
 #define ARRIERE_DROIT 7
+#define PIVOTER_GAUCHE 8
+#define PIVOTER_DROITE 9
 
 /* constantes pour le sens (1 = en avant ; 0 = en arriere) */
 #define EN_AVANT 1
 #define EN_ARRIERE 0
+#define SUR_PLACE 2
 
 #endif // CONST_H
