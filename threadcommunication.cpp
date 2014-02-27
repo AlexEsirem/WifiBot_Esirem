@@ -4,32 +4,50 @@
 #include "threadcommunication.h"
 #include "Const.h"
 
+
+/**
+ * @brief ThreadCommunication::ThreadCommunication
+ * @param ipRobot
+ * @param portRobot
+ * Ce thread gère les communications avec le robot. Envoie les instructions et reçoit les données des capteurs.
+ * L'utilisation d'un thread dédié à ceci permet de ne pas ralentir l'interface graphique qui doit rester
+ * réactive aux actions de l'utilisateur.
+ */
 ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThread()
 {
+    /* Le thread n'est pas terminé par défaut et le socket n'est pas connecté : */
     termine = false;
     connecte = 0;
 
     ip = ipRobot;
     port = portRobot;
 
+    /* On détermine si on travaille avec le robot ou le simulateur. La taille du buffer d'envoi en dépend */
     if(ip == IP_REEL)
         bufferEnvoi = new char[9];
     else
         bufferEnvoi = new char[2];
 
+    /* Dans tous les cas le buffer de réception a une taille de 21 */
     bufferReception = new char[21];
 
-    sensPrecedent = EN_AVANT; // 1 pour avancer ; reculer = 0
+    /* Sens initial : aucun (sur place) */
+    sensPrecedent = SUR_PLACE;
+    /* Vitesse initiale nulle */
     vitessePrecedente = 0;
 
+    /* Création de l'objet SensorData pour stocker les infos des capteurs */
     capteurs = new SensorData();
 
+    /* Creation du socket TCP : */
     socket = new QTcpSocket(this);
 
-    //QObject::connect(socket, SIGNAL(readyRead()), this, SLOT(readData()));
-
+    /* Connexion du socket à l'ip/port demandé.
+     * On attend ensuite la connexion pendant 5 sec max.
+     * Si la connexion est établie (1), c'est bon
+     * Sinon (!=1), alors on affiche un message d'erreur et on quitte l'application. */
     socket->connectToHost(ip, port);
-    if(socket->waitForConnected(1000))
+    if(socket->waitForConnected(5000))
         connecte = 1;
     else
     {
@@ -40,7 +58,7 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
         QApplication::quit();
     }
 
-
+    /* Liaison du signal "socket déconnecté" avec le slot "connexion perdue". */
     QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(connexionPerdue()));
 
 }
@@ -363,7 +381,10 @@ bool ThreadCommunication::sensChange()
     return false;
 }
 
-
+/**
+ * @brief ThreadCommunication::readData
+ * Lit les données des capteurs envoyées par le robot et les stocke dans l'objet de type SensorData.
+ */
 void ThreadCommunication::readData()
 {
     if(socket->bytesAvailable() >= 21)
@@ -381,21 +402,21 @@ void ThreadCommunication::readData()
         emit sensorDataChanged();
     }
 }
-SensorData *ThreadCommunication::getCapteurs() const
-{
-    return capteurs;
-}
 
-void ThreadCommunication::setCapteurs(SensorData *value)
-{
-    capteurs = value;
-}
-
+/**
+ * @brief ThreadCommunication::terminate
+ * Fonction appelée pour arrêter ce thread. On met simplement termine à true.
+ * Cela aura pour effet la fin du run() qui fermera avant ça le socket.
+ */
 void ThreadCommunication::terminate()
 {
     termine = true;
 }
 
+/**
+ * @brief ThreadCommunication::connexionPerdue
+ * Slot appelé en cas de perte de connexion. On affiche un message d'erreur et on quitte.
+ */
 void ThreadCommunication::connexionPerdue()
 {
     if(!termine)
@@ -405,6 +426,19 @@ void ThreadCommunication::connexionPerdue()
         message->exec();
         QApplication::quit();
     }
+}
+
+/********************************
+ * Accesseurs et mutateurs
+ ********************************/
+SensorData *ThreadCommunication::getCapteurs() const
+{
+    return capteurs;
+}
+
+void ThreadCommunication::setCapteurs(SensorData *value)
+{
+    capteurs = value;
 }
 
 int ThreadCommunication::getConnecte()

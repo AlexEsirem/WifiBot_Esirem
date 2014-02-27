@@ -289,6 +289,11 @@ void FenetrePrincipale::majCommandeFromFlags()
  * SLOTS : actions effectuees lorsqu'un evemenement a lieu
  ***************************/
 
+/**
+ * @brief FenetrePrincipale::updateDataLabels
+ * Slot appelé lorsque le thread de communication a recu de nouvelles données du robot.
+ * Met à jour les labels de l'interface pour afficher les infos.
+ */
 void FenetrePrincipale::updateDataLabels()
 {
     labelVitesseAvantGauche->setText("Avant gauche : " + QString::number(tCommunication->getCapteurs()->getVitesseAvantGauche(), 10));
@@ -303,12 +308,11 @@ void FenetrePrincipale::updateDataLabels()
 /**
  * @brief FenetrePrincipale::boutonReleased
  * Appele lorsqu'un bouton de commande est relache.
- * Met la commande avec vitesses = 0 et sens = 1 (initial)
+ * Met la commande à RIEN
  */
 void FenetrePrincipale::boutonReleased()
 {
     commande = RIEN;
-    // Envoyer cette donnee au thread d'envoi
 }
 
 /**
@@ -356,14 +360,15 @@ void FenetrePrincipale::boutonFreinPressed()
 
 /**
  * Quitte le programme lorsque le bouton quitter est clique
- * Ferme d'abord les threads et le socket TCP.
- * Attend la fermeture effective des thread et socket.
+ * L'appel a terminate() permet au thread de communication de fermer son socket et de se terminer proprement.
+ * On attend qu'il soit terminé pendant maximum 5 secondes puis on ferme cette fenetre.
+ * L'application se termine alors.
  */
 void FenetrePrincipale::boutonQuitterClicked()
 {
     // Fermer les threads et attendre leur fin (join())
     tCommunication->terminate();
-    tCommunication->wait(2000);
+    tCommunication->wait(5000);
     // Ferme la fenetre :
     close();
 }
