@@ -30,6 +30,7 @@ class ThreadCommunication : public QThread
 public:
     ThreadCommunication(QString ipRobot, int portRobot);
     void run();
+    void calculVitesses(int *vGauche, int *vDroite, int vMax);
     int getConnecte();
     void terminate();
     SensorData *getCapteurs() const;
