@@ -8,11 +8,16 @@
  */
 
 /* constantes pour savoir si on utilise le simulateur ou le robot */
+#define SIMULATEUR 0
 #define IP_SIMULATEUR "127.0.0.1"
 #define PORT_SIMULATEUR 15020
 
+#define ROBOT 1
 #define IP_REEL "192.168.1.106"
 #define PORT_REEL 15020
+
+/* Constante de timeout, en millisecondes (temps max d'attente pour la connexion du socket) */
+#define SOCK_TIMEOUT 2000
 
 /* Constantes qui indiquent une commande */
 #define RIEN 0

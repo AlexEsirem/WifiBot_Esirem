@@ -1,9 +1,11 @@
 #include <QMessageBox>
 #include <QApplication>
+#include <iostream>
 
 #include "threadcommunication.h"
 #include "Const.h"
 
+using namespace std;
 
 /**
  * @brief ThreadCommunication::ThreadCommunication
@@ -47,7 +49,7 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
      * Si la connexion est établie (1), c'est bon
      * Sinon (!=1), alors on affiche un message d'erreur et on quitte l'application. */
     socket->connectToHost(ip, port);
-    if(socket->waitForConnected(5000))
+    if(socket->waitForConnected(SOCK_TIMEOUT))
         connecte = 1;
     else
     {
@@ -93,7 +95,7 @@ void ThreadCommunication::run(){
                 vitesseMax = 240;
 
                 // calcul des vitesses vGauche et vDroite :
-                calculVitesses(&vGauche, &vDroite, vitesseMax);
+                calculVitesses(&vGauche, &vDroite, vitesseMax, ROBOT);
                 // déterminaiton des sens sGauche et sDroite :
                 calculSens(&sGauche, &sDroite);
 
@@ -102,11 +104,11 @@ void ThreadCommunication::run(){
                 bufferEnvoi[1] = 0x07;
 
                 // Cote gauche :
-                bufferEnvoi[2] = 0; // vérifier à quoi sert celui-ci
-                bufferEnvoi[3] = (char)vGauche;
+                bufferEnvoi[2] = vGauche; // vérifier à quoi sert celui-ci
+                bufferEnvoi[3] = 0;
                 // Cote droit :
-                bufferEnvoi[4] = 0; // vérifier à quoi sert celui-ci
-                bufferEnvoi[5] = (char)vDroite;
+                bufferEnvoi[4] = vDroite; // vérifier à quoi sert celui-ci
+                bufferEnvoi[5] = 0;
 
                 // Définition du flag de commande :
                 int commandFlag = 0;
@@ -117,8 +119,9 @@ void ThreadCommunication::run(){
                 bufferEnvoi[6] = (char)commandFlag;
 
                 // Les deux derniers char sont les CRC :
-                bufferEnvoi[7] = 0;
-                bufferEnvoi[8] = 0;
+                short crc = crc16((unsigned char*)bufferEnvoi+1, 6);
+                bufferEnvoi[7] = (char)crc;
+                bufferEnvoi[8] = (char)(crc >> 8);
 
                 // Envoi du message :
                 socket->write(bufferEnvoi, 9);
@@ -137,7 +140,7 @@ void ThreadCommunication::run(){
                 vitesseMax = 60;
 
                 // Calcul des vitesses vGauche et vDroite :
-                calculVitesses(&vGauche, &vDroite, vitesseMax);
+                calculVitesses(&vGauche, &vDroite, vitesseMax, SIMULATEUR);
                 // déterminaiton des sens sGauche et sDroite :
                 calculSens(&sGauche, &sDroite);
 
@@ -166,7 +169,7 @@ void ThreadCommunication::run(){
     socket->disconnectFromHost();
     // si le socket ne se ferme pas tout de suite on attend sa deconnexion 5 secondes max.
     if (socket->state() != QAbstractSocket::UnconnectedState)
-        socket->waitForDisconnected(5000);
+        socket->waitForDisconnected(SOCK_TIMEOUT);
 }
 
 /**
@@ -184,27 +187,33 @@ void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
         if(sensPrecedent == EN_ARRIERE)
         {
             (*sGauche) = true;
+            (*sDroite) = true;
         }
         break;
 
     case AVANCER:
         (*sGauche) = true;
+        (*sDroite) = true;
         break;
 
     case AVANT_GAUCHE:
         (*sGauche) = true;
+        (*sDroite) = true;
         break;
 
     case AVANT_DROIT:
         (*sGauche) = true;
+        (*sDroite) = true;
         break;
 
     case PIVOTER_GAUCHE:
-        (*sGauche) = true;
+        (*sGauche) = false;
+        (*sDroite) = true;
         break;
 
     case PIVOTER_DROITE:
         (*sGauche) = true;
+        (*sDroite) = false;
         break;
 
     default:
@@ -223,8 +232,13 @@ void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
  * Calcule les vitesses gauche et droite et les affecte aux deux variables dont les pointeurs
  * sont passées en paramètre. Aucune de ces vitesses ne doit dépasser vMax.
  */
-void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
+void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, int plateforme)
 {
+    int incVitesse = 0;
+    if(plateforme == ROBOT)
+        incVitesse = 20;
+    else
+        incVitesse = 5;
     int vitesse = 0;
     switch(commande)
     {
@@ -234,9 +248,9 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
 
     case FREIN:
         // On diminue la vitesse pour atteindre une vitesse nulle. Le sens n'est pas géré par cette fonction.
-        if(vitessePrecedente > 0)
-            vitesse = vitessePrecedente - 1;
-        else // sauf si la vitesse est deja nulle
+        if(vitessePrecedente > incVitesse)
+            vitesse = vitessePrecedente - incVitesse;
+        else // sauf si la vitesse est trop petite
             vitesse = 0;
         break;
 
@@ -244,13 +258,13 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
             // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else // sauf si la vitesse est deja a 60
                 vitesse = vitessePrecedente;
         }
@@ -265,12 +279,12 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // Si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else
                 vitesse = vitessePrecedente;
         }
@@ -285,13 +299,13 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
             // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else // sauf si la vitesse est deja a max
                 vitesse = vitessePrecedente;
         }
@@ -306,13 +320,13 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
             // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else // sauf si la vitesse est deja a max
                 vitesse = vitessePrecedente;
         }
@@ -327,13 +341,13 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
             // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else // sauf si la vitesse est deja a max
                 vitesse = vitessePrecedente;
         }
@@ -348,13 +362,13 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
             // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else // sauf si la vitesse est deja a max
                 vitesse = vitessePrecedente;
         }
@@ -370,12 +384,12 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else
                 vitesse = vitessePrecedente;
         }
@@ -391,12 +405,12 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = 5;
+            vitesse = incVitesse;
         }
         else
         {
-            if(vitessePrecedente < vMax)
-                vitesse = vitessePrecedente + 1;
+            if(vitessePrecedente < vMax-incVitesse)
+                vitesse = vitessePrecedente + incVitesse;
             else
                 vitesse = vitessePrecedente;
         }
@@ -411,6 +425,32 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
         break;
     }
 }
+
+
+short ThreadCommunication::crc16(unsigned char* tab, unsigned char taille_max)
+{
+    unsigned int crc = 0xFFFF;
+    unsigned int polynome = 0xA001;
+    unsigned int cptOctet = 0;
+    unsigned int cptBit = 0;
+    unsigned int parity = 0;
+
+    crc = 0xFFFF;
+    polynome = 0xA001;
+
+    for(cptOctet = 0 ; cptOctet < taille_max ; cptOctet++)
+    {
+        crc ^= *(tab + cptOctet);
+        for(cptBit = 0 ; cptBit <= 7 ; cptBit++)
+        {
+            parity = crc;
+            crc >>= 1;
+            if(parity%2 == true) crc ^= polynome;
+        }
+    }
+    return(crc);
+}
+
 
 /**
  * @brief ThreadCommunication::sensChange
