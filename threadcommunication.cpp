@@ -75,6 +75,7 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
  * la commande et puis on lit les données des capteurs.
  */
 void ThreadCommunication::run(){
+    int n=0;
     while(!termine)
     {
         if(socket->isWritable() && socket->isReadable())
@@ -160,9 +161,15 @@ void ThreadCommunication::run(){
                 // Envoi du message :
                 socket->write(bufferEnvoi, 2);
             }
-            readData();
+            n++;
+            if(n=50)
+            {
+                n=0;
+                readData();
+            }
             msleep(10); // sleep 10 ms.
         }
+
     }
     // si on arrive ici c'est que termine est a true.
     // on ferme le socket et ce thread se terminera.
@@ -310,7 +317,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
                 vitesse = vitessePrecedente;
         }
         // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/4;
+        (*vGauche) += vitesse/2;
         (*vDroite) += vitesse;
         sensPrecedent = EN_AVANT;
         vitessePrecedente = vitesse;
@@ -332,7 +339,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         }
         // la vitesse droite est 4 fois plus petite (pour tourner a droite)
         (*vGauche) += vitesse;
-        (*vDroite) += vitesse/4;
+        (*vDroite) += vitesse/2;
         sensPrecedent = EN_AVANT;
         vitessePrecedente = vitesse;
         break;
@@ -352,7 +359,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
                 vitesse = vitessePrecedente;
         }
         // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/4;
+        (*vGauche) += vitesse/2;
         (*vDroite) += vitesse;
         sensPrecedent = EN_ARRIERE;
         vitessePrecedente = vitesse;
@@ -374,7 +381,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         }
         // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
         (*vGauche) += vitesse;
-        (*vDroite) += vitesse/4;
+        (*vDroite) += vitesse/2;
         sensPrecedent = EN_ARRIERE;
         vitessePrecedente = vitesse;
         break;
@@ -516,13 +523,21 @@ void ThreadCommunication::readData()
     {
         socket->read(bufferReception, 21);
 
-        capteurs->setTensionBatterie((int)bufferReception[0]);
-        capteurs->setVitesseAvantGauche((int)bufferReception[1]);
-        capteurs->setVitesseArriereGauche((int)bufferReception[2]);
-        capteurs->setVitesseAvantDroit((int)bufferReception[3]);
-        capteurs->setVitesseArriereDroit((int)bufferReception[4]);
-        capteurs->setIRgauche((int)bufferReception[5]);
-        capteurs->setIRdroit((int)bufferReception[6]);
+        // Vitesse gauche *(-1) car elle est inversée
+        int vitGauche = (int)((bufferReception[1]>>8) + bufferReception[0])*(-1);
+        if(vitGauche > 32767)
+            vitGauche = vitGauche - 65536;
+        int vitDroite = (int)((bufferReception[10]>>8) + bufferReception[9])*(-1);
+        if(vitDroite > 32767)
+            vitDroite = vitDroite - 65536;
+        capteurs->setVitesseGauche(vitGauche);
+        capteurs->setVitesseDroite(vitDroite);
+        capteurs->setTensionBatterie((int)bufferReception[2]);
+        capteurs->setIRgauche((int)bufferReception[3]);
+        capteurs->setIRgauche2((int)bufferReception[4]);
+        capteurs->setIRdroit((int)bufferReception[11]);
+        capteurs->setIRdroit2((int)bufferReception[12]);
+        capteurs->setCourant((int)bufferReception[17]);
 
         emit sensorDataChanged();
     }

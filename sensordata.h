@@ -9,33 +9,47 @@ class SensorData
 {
 public:
     SensorData();
+
+
     int getTensionBatterie() const;
     void setTensionBatterie(int value);
-    int getVitesseAvantGauche() const;
-    void setVitesseAvantGauche(int value);
-    int getVitesseArriereGauche() const;
-    void setVitesseArriereGauche(int value);
-    int getVitesseArriereDroit() const;
-    void setVitesseArriereDroit(int value);
-    int getVitesseAvantDroit() const;
-    void setVitesseAvantDroit(int value);
+
+    int getVitesseGauche() const;
+    void setVitesseGauche(int value);
+
+    int getVitesseDroite() const;
+    void setVitesseDroite(int value);
+
     int getIRgauche() const;
     void setIRgauche(int value);
+
     int getIRdroit() const;
     void setIRdroit(int value);
+
+    int getCourant() const;
+    void setCourant(int value);
+
     long getOdometrieGauche() const;
     void setOdometrieGauche(long value);
+
     long getOdometrieDroite() const;
     void setOdometrieDroite(long value);
 
+    int getIRgauche2() const;
+    void setIRgauche2(int value);
+
+    int getIRdroit2() const;
+    void setIRdroit2(int value);
+
 private:
     int tensionBatterie;
-    int vitesseAvantGauche;
-    int vitesseArriereGauche;
-    int vitesseAvantDroit;
-    int vitesseArriereDroit;
+    int vitesseGauche;
+    int vitesseDroite;
     int IRgauche;
+    int IRgauche2;
     int IRdroit;
+    int IRdroit2;
+    int courant;
     long odometrieGauche;
     long odometrieDroite;
 };

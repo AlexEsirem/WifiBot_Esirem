@@ -49,15 +49,16 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     labelDirection = new QLabel(this);
     choixDirection = new QSlider(Qt::Vertical, this);
 
-    labelVitesseAvantGauche = new QLabel(this);
-    labelVitesseArriereGauche = new QLabel(this);
-    labelVitesseAvantDroit = new QLabel(this);
-    labelVitesseArriereDroit = new QLabel(this);
+    labelVitesseGauche = new QLabel(this);
+    labelVitesseDroite = new QLabel(this);
     labelTensionBatterie = new QLabel(this);
     labelIRGauche = new QLabel(this);
+    labelIRGauche2 = new QLabel(this);
     labelIRDroit = new QLabel(this);
+    labelIRDroit2 = new QLabel(this);
     labelIR = new QLabel(this);
     labelVitesses = new QLabel(this);
+    labelCourant = new QLabel(this);
 
     boutonQuitter = new QPushButton(this);
 
@@ -84,15 +85,16 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     QFont police("Trebuchet MS", 14, QFont::Bold);
     labelVitesses->setFont(police);
     labelVitesses->setText("Vitesses");
-    labelVitesseAvantGauche->setText("Avant gauche :");
-    labelVitesseArriereGauche->setText("Arriere gauche :");
-    labelVitesseAvantDroit->setText("Avant droit :");
-    labelVitesseArriereDroit->setText("Arriere droit :");
+    labelVitesseGauche->setText("Gauche :");
+    labelVitesseDroite->setText("Droite :");
     labelTensionBatterie->setText("Batterie :");
     labelIR->setFont(police);
     labelIR->setText("Infrarouges");
     labelIRGauche->setText("Gauche :");
-    labelIRDroit->setText("Droit :");
+    labelIRGauche2->setText("Gauche 2 :");
+    labelIRDroit->setText("Droite :");
+    labelIRDroit2->setText("Droite 2 :");
+    labelCourant->setText("Courant :");
 
     /* On utilisera 4 layouts :
      * - Un principal qui contiendra tous les éléments
@@ -118,14 +120,15 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     layoutData->setHorizontalSpacing(30);
 
     layoutData->addWidget(labelVitesses, 0, 0, Qt::AlignRight);
-    layoutData->addWidget(labelVitesseAvantGauche, 0, 1);
-    layoutData->addWidget(labelVitesseAvantDroit, 0, 2);
-    layoutData->addWidget(labelVitesseArriereGauche, 1, 1);
-    layoutData->addWidget(labelVitesseArriereDroit, 1, 2);
+    layoutData->addWidget(labelVitesseGauche, 0, 1);
+    layoutData->addWidget(labelVitesseDroite, 1, 1);
     layoutData->addWidget(labelIR, 2, 0, Qt::AlignRight);
     layoutData->addWidget(labelIRGauche, 2, 1);
-    layoutData->addWidget(labelIRDroit, 2, 2);
-    layoutData->addWidget(labelTensionBatterie, 3, 0, 1, 2);
+    layoutData->addWidget(labelIRGauche2, 2, 2);
+    layoutData->addWidget(labelIRDroit, 3, 1);
+    layoutData->addWidget(labelIRDroit2, 3, 2);
+    layoutData->addWidget(labelTensionBatterie, 4, 0, 1, 2);
+    layoutData->addWidget(labelCourant, 5, 0);
 
     layoutCommandes->addWidget(boutonAccelerer, 1, 1);
     layoutCommandes->addWidget(boutonGauche, 2, 0);
@@ -296,13 +299,14 @@ void FenetrePrincipale::majCommandeFromFlags()
  */
 void FenetrePrincipale::updateDataLabels()
 {
-    labelVitesseAvantGauche->setText("Avant gauche : " + QString::number(tCommunication->getCapteurs()->getVitesseAvantGauche(), 10));
-    labelVitesseAvantDroit->setText("Avant droit : " + QString::number(tCommunication->getCapteurs()->getVitesseAvantDroit(), 10));
-    labelVitesseArriereGauche->setText("Arriere gauche : " + QString::number(tCommunication->getCapteurs()->getVitesseArriereGauche(), 10));
-    labelVitesseArriereDroit->setText("Arriere droit : " + QString::number(tCommunication->getCapteurs()->getVitesseArriereDroit(), 10));
-    labelIRDroit->setText("Droit : " + QString::number(tCommunication->getCapteurs()->getIRdroit(), 10));
+    labelVitesseGauche->setText("Gauche : " + QString::number(tCommunication->getCapteurs()->getVitesseGauche(), 10));
+    labelVitesseDroite->setText("Droite : " + QString::number(tCommunication->getCapteurs()->getVitesseDroite(), 10));
+    labelIRDroit->setText("Droite : " + QString::number(tCommunication->getCapteurs()->getIRdroit(), 10));
+    labelIRDroit2->setText("Droite 2 : " + QString::number(tCommunication->getCapteurs()->getIRdroit2(), 10));
     labelIRGauche->setText("Gauche : " + QString::number(tCommunication->getCapteurs()->getIRgauche(), 10));
+    labelIRGauche2->setText("Gauche 2 : " + QString::number(tCommunication->getCapteurs()->getIRgauche2(), 10));
     labelTensionBatterie->setText("Batterie : " + QString::number(tCommunication->getCapteurs()->getTensionBatterie(), 10));
+    labelCourant->setText("Courant : " + QString::number(tCommunication->getCapteurs()->getCourant(), 10));
 }
 
 /**

@@ -58,15 +58,16 @@ private:
     QPushButton *boutonQuitter;
     QLabel *labelDirection;
     QSlider *choixDirection;
-    QLabel *labelVitesseAvantGauche;
-    QLabel *labelVitesseAvantDroit;
-    QLabel *labelVitesseArriereGauche;
-    QLabel *labelVitesseArriereDroit;
+    QLabel *labelVitesseGauche;
+    QLabel *labelVitesseDroite;
     QLabel *labelTensionBatterie;
     QLabel *labelIRGauche;
+    QLabel *labelIRGauche2;
     QLabel *labelIRDroit;
+    QLabel *labelIRDroit2;
     QLabel *labelIR;
     QLabel *labelVitesses;
+    QLabel *labelCourant;
 
     /* thread de communication. Se chargera d'échanger avec le robot */
     ThreadCommunication *tCommunication;
