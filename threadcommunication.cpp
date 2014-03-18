@@ -75,7 +75,6 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
  * la commande et puis on lit les données des capteurs.
  */
 void ThreadCommunication::run(){
-    int n=0;
     while(!termine)
     {
         if(socket->isWritable() && socket->isReadable())
@@ -162,12 +161,8 @@ void ThreadCommunication::run(){
                 socket->write(bufferEnvoi, 2);
             }
 
-            n++;
-            if(n==2)
-            {
-                n=0;
-                readData();
-            }
+            readData();
+
             msleep(50); // sleep 50 ms.
         }
 
@@ -249,188 +244,30 @@ void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
  */
 void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, int plateforme)
 {
-    int incVitesse = 0;
-    if(plateforme == ROBOT)
-        incVitesse = 20;
-    else
-        incVitesse = 5;
-    int vitesse = 0;
-    int vitesseInit = 60;
-    switch(commande)
+    if(commande == AVANCER
+            || commande == RECULER
+                || commande == PIVOTER_DROITE
+                    || commande == PIVOTER_GAUCHE)
     {
-    case RIEN:
-        // vGauche et vDroite ne sont pas modifiées
-        break;
-
-    case AVANCER:
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à vitesseInit
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else // sauf si la vitesse est deja a 60
-                vitesse = vitessePrecedente;
-        }
-        // on ajoute ces vitesses aux 2 chars :
-        (*vGauche) += vitesse;
-        (*vDroite) += vitesse;
-        sensPrecedent = EN_AVANT;
-        vitessePrecedente = vitesse;
-        break;
-
-    case RECULER:
-        if(sensChange())
-        {
-            // Si le sens a change on met la vitesse init
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else
-                vitesse = vitessePrecedente;
-        }
-        // on ajoute ces vitesses aux 2 chars :
-        (*vGauche) += vitesse;
-        (*vDroite) += vitesse;
-        sensPrecedent = EN_ARRIERE;
-        vitessePrecedente = vitesse;
-        break;
-
-    case AVANT_GAUCHE:
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à init
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else // sauf si la vitesse est deja a max
-                vitesse = vitessePrecedente;
-        }
-        // la vitesse gauche est 3 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/3;
-        (*vDroite) += vitesse;
-        sensPrecedent = EN_AVANT;
-        vitessePrecedente = vitesse;
-        break;
-
-    case AVANT_DROIT:
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else // sauf si la vitesse est deja a max
-                vitesse = vitessePrecedente;
-        }
-        // la vitesse droite est 4 fois plus petite (pour tourner a droite)
-        (*vGauche) += vitesse;
-        (*vDroite) += vitesse/3;
-        sensPrecedent = EN_AVANT;
-        vitessePrecedente = vitesse;
-        break;
-
-    case ARRIERE_GAUCHE:
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else // sauf si la vitesse est deja a max
-                vitesse = vitessePrecedente;
-        }
-        // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/3;
-        (*vDroite) += vitesse;
-        sensPrecedent = EN_ARRIERE;
-        vitessePrecedente = vitesse;
-        break;
-
-    case ARRIERE_DROIT:
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            // si le sens n'a pas changé on augmente la vitesse de 1 :
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else // sauf si la vitesse est deja a max
-                vitesse = vitessePrecedente;
-        }
-        // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse;
-        (*vDroite) += vitesse/3;
-        sensPrecedent = EN_ARRIERE;
-        vitessePrecedente = vitesse;
-        break;
-
-    case PIVOTER_GAUCHE:
-        // le robot tourne sur lui-meme :
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else
-                vitesse = vitessePrecedente;
-        }
-        // Le coté gauche ira en arriere et le droit en avant, avec la même vitesse :
-        (*vDroite) += vitesse;
-        (*vGauche) += vitesse;
-        sensPrecedent = SUR_PLACE;
-        vitessePrecedente = vitesse;
-        break;
-
-    case PIVOTER_DROITE:
-        // le robot tourne sur lui-meme :
-        if(sensChange())
-        {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = vitesseInit;
-        }
-        else
-        {
-            if(vitessePrecedente < vMax-incVitesse)
-                vitesse = vitessePrecedente + incVitesse;
-            else
-                vitesse = vitessePrecedente;
-        }
-        // Le coté droite ira en arriere et le gauche en avant, avec la même vitesse :
-        (*vGauche) += vitesse;
-        (*vDroite) += vitesse;
-        sensPrecedent = SUR_PLACE;
-        vitessePrecedente = vitesse;
-        break;
-
-    default:
-        break;
+            (*vGauche) = vMax;
+            (*vDroite) = vMax;
+    }
+    else if(commande == AVANT_DROIT
+            || commande == ARRIERE_DROIT)
+    {
+            (*vGauche) = vMax;
+            (*vDroite) = vMax/4;
+    }
+    else if(commande == AVANT_GAUCHE
+            || commande == ARRIERE_GAUCHE)
+    {
+            (*vGauche) = vMax/4;
+            (*vDroite) = vMax;
+    }
+    else
+    {
+        (*vGauche) = 0;
+        (*vDroite) = 0;
     }
 }
 
@@ -524,11 +361,11 @@ void ThreadCommunication::readData()
 
         // Vitesse gauche *(-1) car elle est inversée
         int vitGauche = (int)((bufferReception[1]>>8) + bufferReception[0])*(-1);
-        //if(vitGauche > 32767)
-        //    vitGauche = vitGauche - 65536;
+        if(vitGauche > 32767)
+            vitGauche = vitGauche - 65536;
         int vitDroite = (int)((bufferReception[10]>>8) + bufferReception[9])*(-1);
-        //if(vitDroite > 32767)
-        //    vitDroite = vitDroite - 65536;
+        if(vitDroite > 32767)
+            vitDroite = vitDroite - 65536;
         capteurs->setVitesseGauche(vitGauche);
         capteurs->setVitesseDroite(vitDroite);
         capteurs->setTensionBatterie((int)bufferReception[2]);

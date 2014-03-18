@@ -30,7 +30,7 @@ class ThreadCommunication : public QThread
 public:
     ThreadCommunication(QString ipRobot, int portRobot);
     void run();
-    void calculVitesses(int *vGauche, int *vDroite, int vMax, int plateforme);
+    void calculVitesses(int *vGauche, int *vDroite, int vMax);
     void calculSens(bool *sGauche, bool *sDroite);
     short crc16(unsigned char* tab, unsigned char taille_max);
     int getConnecte();
