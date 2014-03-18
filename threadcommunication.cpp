@@ -95,7 +95,7 @@ void ThreadCommunication::run(){
                 vitesseMax = 240;
 
                 // calcul des vitesses vGauche et vDroite :
-                calculVitesses(&vGauche, &vDroite, vitesseMax, ROBOT);
+                calculVitesses(&vGauche, &vDroite, vitesseMax);
                 // déterminaiton des sens sGauche et sDroite :
                 calculSens(&sGauche, &sDroite);
 
@@ -140,7 +140,7 @@ void ThreadCommunication::run(){
                 vitesseMax = 60;
 
                 // Calcul des vitesses vGauche et vDroite :
-                calculVitesses(&vGauche, &vDroite, vitesseMax, SIMULATEUR);
+                calculVitesses(&vGauche, &vDroite, vitesseMax);
                 // déterminaiton des sens sGauche et sDroite :
                 calculSens(&sGauche, &sDroite);
 
@@ -242,7 +242,7 @@ void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
  * Calcule les vitesses gauche et droite et les affecte aux deux variables dont les pointeurs
  * sont passées en paramètre. Aucune de ces vitesses ne doit dépasser vMax.
  */
-void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, int plateforme)
+void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
 {
     if(commande == AVANCER
             || commande == RECULER
