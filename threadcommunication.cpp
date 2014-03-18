@@ -161,13 +161,14 @@ void ThreadCommunication::run(){
                 // Envoi du message :
                 socket->write(bufferEnvoi, 2);
             }
+
             n++;
-            if(n=50)
+            if(n==2)
             {
                 n=0;
                 readData();
             }
-            msleep(10); // sleep 10 ms.
+            msleep(50); // sleep 50 ms.
         }
 
     }
@@ -190,17 +191,24 @@ void ThreadCommunication::calculSens(bool *sGauche, bool *sDroite)
 {
     switch(commande)
     {
-    case FREIN:
-        if(sensPrecedent == EN_ARRIERE)
-        {
-            (*sGauche) = true;
-            (*sDroite) = true;
-        }
-        break;
-
     case AVANCER:
         (*sGauche) = true;
         (*sDroite) = true;
+        break;
+
+    case RECULER:
+        (*sGauche) = false;
+        (*sDroite) = false;
+        break;
+
+    case ARRIERE_GAUCHE:
+        (*sGauche) = false;
+        (*sDroite) = false;
+        break;
+
+    case ARRIERE_DROIT:
+        (*sGauche) = false;
+        (*sDroite) = false;
         break;
 
     case AVANT_GAUCHE:
@@ -247,25 +255,18 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
     else
         incVitesse = 5;
     int vitesse = 0;
+    int vitesseInit = 60;
     switch(commande)
     {
     case RIEN:
         // vGauche et vDroite ne sont pas modifiées
         break;
 
-    case FREIN:
-        // On diminue la vitesse pour atteindre une vitesse nulle. Le sens n'est pas géré par cette fonction.
-        if(vitessePrecedente > incVitesse)
-            vitesse = vitessePrecedente - incVitesse;
-        else // sauf si la vitesse est trop petite
-            vitesse = 0;
-        break;
-
     case AVANCER:
         if(sensChange())
         {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            // si le sens a change on met la vitesse à vitesseInit
+            vitesse = vitesseInit;
         }
         else
         {
@@ -285,8 +286,8 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
     case RECULER:
         if(sensChange())
         {
-            // Si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            // Si le sens a change on met la vitesse init
+            vitesse = vitesseInit;
         }
         else
         {
@@ -305,8 +306,8 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
     case AVANT_GAUCHE:
         if(sensChange())
         {
-            // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            // si le sens a change on met la vitesse à init
+            vitesse = vitesseInit;
         }
         else
         {
@@ -316,8 +317,8 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
             else // sauf si la vitesse est deja a max
                 vitesse = vitessePrecedente;
         }
-        // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/2;
+        // la vitesse gauche est 3 fois plus petite (pour tourner a gauche)
+        (*vGauche) += vitesse/3;
         (*vDroite) += vitesse;
         sensPrecedent = EN_AVANT;
         vitessePrecedente = vitesse;
@@ -327,7 +328,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            vitesse = vitesseInit;
         }
         else
         {
@@ -339,7 +340,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         }
         // la vitesse droite est 4 fois plus petite (pour tourner a droite)
         (*vGauche) += vitesse;
-        (*vDroite) += vitesse/2;
+        (*vDroite) += vitesse/3;
         sensPrecedent = EN_AVANT;
         vitessePrecedente = vitesse;
         break;
@@ -348,7 +349,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            vitesse = vitesseInit;
         }
         else
         {
@@ -359,7 +360,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
                 vitesse = vitessePrecedente;
         }
         // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
-        (*vGauche) += vitesse/2;
+        (*vGauche) += vitesse/3;
         (*vDroite) += vitesse;
         sensPrecedent = EN_ARRIERE;
         vitessePrecedente = vitesse;
@@ -369,7 +370,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            vitesse = vitesseInit;
         }
         else
         {
@@ -381,7 +382,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         }
         // la vitesse gauche est 4 fois plus petite (pour tourner a gauche)
         (*vGauche) += vitesse;
-        (*vDroite) += vitesse/2;
+        (*vDroite) += vitesse/3;
         sensPrecedent = EN_ARRIERE;
         vitessePrecedente = vitesse;
         break;
@@ -391,7 +392,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            vitesse = vitesseInit;
         }
         else
         {
@@ -412,7 +413,7 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax, i
         if(sensChange())
         {
             // si le sens a change on met la vitesse à 5 (lent)
-            vitesse = incVitesse;
+            vitesse = vitesseInit;
         }
         else
         {
@@ -472,8 +473,7 @@ bool ThreadCommunication::sensChange()
 {
     if(sensPrecedent == EN_AVANT)  // si on allait en avant et que...
     {
-        if(commande == FREIN // on demande de freiner
-            || commande == RECULER  // on demande de reculer
+        if(commande == RECULER  // on demande de reculer
                 || commande == ARRIERE_GAUCHE
                     ||commande == ARRIERE_DROIT
                         || commande == PIVOTER_DROITE
@@ -485,8 +485,7 @@ bool ThreadCommunication::sensChange()
     }
     else if(sensPrecedent == EN_ARRIERE)  // si on allait en arriere et que...
     {
-        if(commande == FREIN // on demande de freiner
-                || commande == AVANCER // on demande d'avancer
+        if(commande == AVANCER // on demande d'avancer
                     || commande == AVANT_DROIT
                         || commande == AVANT_GAUCHE
                             || commande == PIVOTER_DROITE
@@ -525,11 +524,11 @@ void ThreadCommunication::readData()
 
         // Vitesse gauche *(-1) car elle est inversée
         int vitGauche = (int)((bufferReception[1]>>8) + bufferReception[0])*(-1);
-        if(vitGauche > 32767)
-            vitGauche = vitGauche - 65536;
+        //if(vitGauche > 32767)
+        //    vitGauche = vitGauche - 65536;
         int vitDroite = (int)((bufferReception[10]>>8) + bufferReception[9])*(-1);
-        if(vitDroite > 32767)
-            vitDroite = vitDroite - 65536;
+        //if(vitDroite > 32767)
+        //    vitDroite = vitDroite - 65536;
         capteurs->setVitesseGauche(vitGauche);
         capteurs->setVitesseDroite(vitDroite);
         capteurs->setTensionBatterie((int)bufferReception[2]);

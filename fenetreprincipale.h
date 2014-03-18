@@ -32,11 +32,23 @@ public:
 
 public slots:
     void updateDataLabels();
-    void boutonReleased();
     void boutonAccelererPressed();
+    void boutonAccelererReleased();
+    void boutonReculerPressed();
+    void boutonReculerReleased();
     void boutonDroitePressed();
+    void boutonDroiteReleased();
     void boutonGauchePressed();
-    void boutonFreinPressed();
+    void boutonGaucheReleased();
+    void boutonAvantGauchePressed();
+    void boutonAvantGaucheReleased();
+    void boutonAvantDroitePressed();
+    void boutonAvantDroiteReleased();
+    void boutonArriereGauchePressed();
+    void boutonArriereGaucheReleased();
+    void boutonArriereDroitePressed();
+    void boutonArriereDroiteReleased();
+
     void boutonQuitterClicked();
 
 private:
@@ -52,12 +64,15 @@ private:
 
     /* Elements de l'interface */
     QPushButton *boutonAccelerer;
-    QPushButton *boutonFrein;
+    QPushButton *boutonReculer;
     QPushButton *boutonGauche;
     QPushButton *boutonDroite;
+    QPushButton *boutonAvantDroite;
+    QPushButton *boutonAvantGauche;
+    QPushButton *boutonArriereDroite;
+    QPushButton *boutonArriereGauche;
     QPushButton *boutonQuitter;
-    QLabel *labelDirection;
-    QSlider *choixDirection;
+
     QLabel *labelVitesseGauche;
     QLabel *labelVitesseDroite;
     QLabel *labelTensionBatterie;

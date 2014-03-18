@@ -25,6 +25,9 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 {
     this->setWindowTitle("WifiBot Control");
 
+    QFont police("Trebuchet MS", 12);
+    this->setFont(police);
+
     /* Initialisation des elements de fonctionnement : */
     commande = RIEN;    // initialement aucune commande n'est demandé, donc RIEN
     ip = ipRobot;
@@ -42,12 +45,13 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
     /* Création des elements graphiques : */
     boutonAccelerer = new QPushButton(this);
-    boutonFrein = new QPushButton(this);
+    boutonReculer = new QPushButton(this);
     boutonGauche = new QPushButton(this);
     boutonDroite = new QPushButton(this);
-
-    labelDirection = new QLabel(this);
-    choixDirection = new QSlider(Qt::Vertical, this);
+    boutonAvantDroite = new QPushButton(this);
+    boutonArriereDroite = new QPushButton(this);
+    boutonAvantGauche = new QPushButton(this);
+    boutonArriereGauche = new QPushButton(this);
 
     labelVitesseGauche = new QLabel(this);
     labelVitesseDroite = new QLabel(this);
@@ -64,31 +68,32 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
     /* Donnees des elements graphiques */
     boutonAccelerer->setText("Accelerer");
-    boutonFrein->setText("Frein");
+    boutonReculer->setText("Reculer");
     boutonGauche->setText("Gauche");
     boutonDroite->setText("Droite");
+    boutonAvantDroite->setText("Av.Droite");
+    boutonArriereDroite->setText("Ar.Droite");
+    boutonAvantGauche->setText("Av.Gauche");
+    boutonArriereGauche->setText("Ar.Gauche");
     boutonQuitter->setText("Quitter");
 
     boutonAccelerer->setFixedSize(100,40);
-    boutonFrein->setFixedSize(100,40);
+    boutonReculer->setFixedSize(100,40);
     boutonGauche->setFixedSize(100,40);
     boutonDroite->setFixedSize(100,40);
+    boutonAvantDroite->setFixedSize(100,40);
+    boutonArriereDroite->setFixedSize(100,40);
+    boutonAvantGauche->setFixedSize(100,40);
+    boutonArriereGauche->setFixedSize(100,40);
     boutonQuitter->setFixedSize(100,40);
 
-    labelDirection->setText("Avant");
-    choixDirection->setMinimum(0);
-    choixDirection->setMaximum(1);
-    choixDirection->setTickInterval(1);
-    choixDirection->setValue(1);
-    choixDirection->setFixedSize(30,40);
-
-    QFont police("Trebuchet MS", 14, QFont::Bold);
-    labelVitesses->setFont(police);
+    QFont policeGras("Trebuchet MS", 14, QFont::Bold);
+    labelVitesses->setFont(policeGras);
     labelVitesses->setText("Vitesses");
     labelVitesseGauche->setText("Gauche :");
     labelVitesseDroite->setText("Droite :");
     labelTensionBatterie->setText("Batterie :");
-    labelIR->setFont(police);
+    labelIR->setFont(policeGras);
     labelIR->setText("Infrarouges");
     labelIRGauche->setText("Gauche :");
     labelIRGauche2->setText("Gauche 2 :");
@@ -130,18 +135,20 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     layoutData->addWidget(labelTensionBatterie, 4, 0, 1, 2);
     layoutData->addWidget(labelCourant, 5, 0);
 
+    layoutCommandes->addWidget(boutonAvantGauche, 1, 0);
     layoutCommandes->addWidget(boutonAccelerer, 1, 1);
+    layoutCommandes->addWidget(boutonAvantDroite, 1, 2);
     layoutCommandes->addWidget(boutonGauche, 2, 0);
-    layoutCommandes->addWidget(boutonFrein, 2, 1);
     layoutCommandes->addWidget(boutonDroite, 2, 2);
-    layoutCommandes->addWidget(labelDirection, 0, 3, Qt::AlignCenter);
-    layoutCommandes->addWidget(choixDirection, 1, 3, 2,1);
+    layoutCommandes->addWidget(boutonArriereGauche, 3, 0);
+    layoutCommandes->addWidget(boutonReculer, 3, 1);
+    layoutCommandes->addWidget(boutonArriereDroite, 3, 2);
 
     layoutDroite->setVerticalSpacing(30);
 
     layoutDroite->addLayout(layoutCommandes,0,0, Qt::AlignRight|Qt::AlignTop);
     layoutDroite->addWidget(separateurH1, 1, 0);
-    layoutDroite->addLayout(layoutData, 2, 0, Qt::AlignRight);
+    layoutDroite->addLayout(layoutData, 2, 0, Qt::AlignLeft);
     layoutDroite->addWidget(separateurH2, 3, 0);
     layoutDroite->addWidget(boutonQuitter, 4,0, Qt::AlignBottom|Qt::AlignRight);
 
@@ -154,13 +161,21 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
      * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
     QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
     QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
-    QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonReleased()));
-    QObject::connect(boutonFrein, SIGNAL(pressed()), this, SLOT(boutonFreinPressed()));
-    QObject::connect(boutonFrein, SIGNAL(released()), this, SLOT(boutonReleased()));
+    QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonAccelererReleased()));
+    QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerPressed()));
+    QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerReleased()));
     QObject::connect(boutonGauche, SIGNAL(pressed()), this, SLOT(boutonGauchePressed()));
-    QObject::connect(boutonGauche, SIGNAL(released()), this, SLOT(boutonReleased()));
+    QObject::connect(boutonGauche, SIGNAL(released()), this, SLOT(boutonGaucheReleased()));
     QObject::connect(boutonDroite, SIGNAL(pressed()), this, SLOT(boutonDroitePressed()));
-    QObject::connect(boutonDroite, SIGNAL(released()), this, SLOT(boutonReleased()));
+    QObject::connect(boutonDroite, SIGNAL(released()), this, SLOT(boutonDroiteReleased()));
+    QObject::connect(boutonAvantGauche, SIGNAL(pressed()), this, SLOT(boutonAvantGauchePressed()));
+    QObject::connect(boutonAvantGauche, SIGNAL(released()), this, SLOT(boutonAvantGaucheReleased()));
+    QObject::connect(boutonAvantDroite, SIGNAL(pressed()), this, SLOT(boutonAvantDroitePressed()));
+    QObject::connect(boutonAvantDroite, SIGNAL(released()), this, SLOT(boutonAvantDroiteReleased()));
+    QObject::connect(boutonArriereGauche, SIGNAL(pressed()), this, SLOT(boutonArriereGauchePressed()));
+    QObject::connect(boutonArriereGauche, SIGNAL(released()), this, SLOT(boutonArriereGaucheReleased()));
+    QObject::connect(boutonArriereDroite, SIGNAL(pressed()), this, SLOT(boutonArriereDroitePressed()));
+    QObject::connect(boutonArriereDroite, SIGNAL(released()), this, SLOT(boutonArriereDroiteReleased()));
 
     /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
     QObject::connect(tCommunication, SIGNAL(sensorDataChanged()), this, SLOT(updateDataLabels()));
@@ -299,24 +314,15 @@ void FenetrePrincipale::majCommandeFromFlags()
  */
 void FenetrePrincipale::updateDataLabels()
 {
-    labelVitesseGauche->setText("Gauche : " + QString::number(tCommunication->getCapteurs()->getVitesseGauche(), 10));
-    labelVitesseDroite->setText("Droite : " + QString::number(tCommunication->getCapteurs()->getVitesseDroite(), 10));
-    labelIRDroit->setText("Droite : " + QString::number(tCommunication->getCapteurs()->getIRdroit(), 10));
-    labelIRDroit2->setText("Droite 2 : " + QString::number(tCommunication->getCapteurs()->getIRdroit2(), 10));
-    labelIRGauche->setText("Gauche : " + QString::number(tCommunication->getCapteurs()->getIRgauche(), 10));
-    labelIRGauche2->setText("Gauche 2 : " + QString::number(tCommunication->getCapteurs()->getIRgauche2(), 10));
-    labelTensionBatterie->setText("Batterie : " + QString::number(tCommunication->getCapteurs()->getTensionBatterie(), 10));
-    labelCourant->setText("Courant : " + QString::number(tCommunication->getCapteurs()->getCourant(), 10));
-}
-
-/**
- * @brief FenetrePrincipale::boutonReleased
- * Appele lorsqu'un bouton de commande est relache.
- * Met la commande à RIEN
- */
-void FenetrePrincipale::boutonReleased()
-{
-    commande = RIEN;
+    SensorData *capteurs = tCommunication->getCapteurs();
+    labelVitesseGauche->setText("Gauche : " + QString::number(capteurs->getVitesseGauche(), 10));
+    labelVitesseDroite->setText("Droite : " + QString::number(capteurs->getVitesseDroite(), 10));
+    labelIRDroit->setText("Droite : " + QString::number(capteurs->getIRdroit(), 10));
+    labelIRDroit2->setText("Droite 2 : " + QString::number(capteurs->getIRdroit2(), 10));
+    labelIRGauche->setText("Gauche : " + QString::number(capteurs->getIRgauche(), 10));
+    labelIRGauche2->setText("Gauche 2 : " + QString::number(capteurs->getIRgauche2(), 10));
+    labelTensionBatterie->setText("Batterie : " + QString::number(capteurs->getTensionBatterie(), 10));
+    labelCourant->setText("Courant : " + QString::number(capteurs->getCourant(), 10));
 }
 
 /**
@@ -325,10 +331,26 @@ void FenetrePrincipale::boutonReleased()
  */
 void FenetrePrincipale::boutonAccelererPressed()
 {
-    if(choixDirection->value() == 1)
-        commande = AVANCER;
-    else
-        commande = RECULER;
+    keyUp = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonAccelererReleased()
+{
+    keyUp = false;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonReculerPressed()
+{
+    keyDown = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonReculerReleased()
+{
+    keyDown = false;
+    majCommandeFromFlags();
 }
 
 /**
@@ -336,10 +358,14 @@ void FenetrePrincipale::boutonAccelererPressed()
  */
 void FenetrePrincipale::boutonDroitePressed()
 {
-    if(choixDirection->value() == 1)
-        commande = AVANT_DROIT;
-    else
-        commande = ARRIERE_DROIT;
+    keyRight = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonDroiteReleased()
+{
+    keyRight = false;
+    majCommandeFromFlags();
 }
 
 /**
@@ -347,19 +373,73 @@ void FenetrePrincipale::boutonDroitePressed()
  */
 void FenetrePrincipale::boutonGauchePressed()
 {
-    if(choixDirection->value() == 1)
-        commande = AVANT_GAUCHE;
-    else
-        commande = ARRIERE_GAUCHE;
+    keyLeft = true;
+    majCommandeFromFlags();
 }
 
-/**
- * @brief FenetrePrincipale::boutonFreinPressed
- */
-void FenetrePrincipale::boutonFreinPressed()
+void FenetrePrincipale::boutonGaucheReleased()
 {
-    commande = FREIN;
+    keyLeft = false;
+    majCommandeFromFlags();
 }
+
+void FenetrePrincipale::boutonAvantGauchePressed()
+{
+    keyUp = true;
+    keyLeft = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonAvantGaucheReleased()
+{
+    keyUp = false;
+    keyLeft = false;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonAvantDroitePressed()
+{
+    keyUp = true;
+    keyRight = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonAvantDroiteReleased()
+{
+    keyUp = false;
+    keyRight = false;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonArriereGauchePressed()
+{
+    keyDown = true;
+    keyLeft = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonArriereGaucheReleased()
+{
+    keyDown = false;
+    keyLeft = false;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonArriereDroitePressed()
+{
+    keyDown = true;
+    keyRight = true;
+    majCommandeFromFlags();
+}
+
+void FenetrePrincipale::boutonArriereDroiteReleased()
+{
+    keyDown = false;
+    keyRight = false;
+    majCommandeFromFlags();
+}
+
+
 
 
 /**
