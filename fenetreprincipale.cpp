@@ -157,6 +157,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     /* Application du layout à cette fenêtre */
     this->setLayout(layoutPrincipal);
 
+
+
+
+
+
     /* Liaison entre les boutons de l'interface et les actions à effectuer :
      * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
     QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
