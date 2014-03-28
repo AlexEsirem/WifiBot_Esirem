@@ -1,5 +1,7 @@
 QT += widgets
 QT += network
+QT += webkit
+QT += webkitwidgets
 
 HEADERS += \
     Const.h \

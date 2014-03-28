@@ -7,6 +7,10 @@
 #include <QLabel>
 #include <QSlider>
 
+#include "pageweb.h"
+#include <QWebView>
+#include <QtWebKit>
+
 #include "threadcommunication.h"
 
 /**
@@ -83,6 +87,9 @@ private:
     QLabel *labelIR;
     QLabel *labelVitesses;
     QLabel *labelCourant;
+
+    /* Elements Web pour la caméra */
+    QWebView *pageWeb;
 
     /* thread de communication. Se chargera d'échanger avec le robot */
     ThreadCommunication *tCommunication;

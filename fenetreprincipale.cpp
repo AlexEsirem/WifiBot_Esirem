@@ -101,6 +101,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     labelIRDroit2->setText("Droite 2 :");
     labelCourant->setText("Courant :");
 
+    /* Elements de page Web pour la camera : */
+    pageWeb = new QWebView(this);
+    pageWeb->setFocusPolicy(Qt::NoFocus);
+    pageWeb->load(QUrl("http://qt-project.org"));
+
     /* On utilisera 4 layouts :
      * - Un principal qui contiendra tous les éléments
      * - Un de droite qui contiendra les layouts commandes et data
@@ -154,6 +159,8 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
     layoutPrincipal->addLayout(layoutDroite, 0,1);
 
+    layoutPrincipal->addWidget(pageWeb, 0,0);
+
     /* Application du layout à cette fenêtre */
     this->setLayout(layoutPrincipal);
 
@@ -168,7 +175,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
     QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonAccelererReleased()));
     QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerPressed()));
-    QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerReleased()));
+    QObject::connect(boutonReculer, SIGNAL(released()), this, SLOT(boutonReculerReleased()));
     QObject::connect(boutonGauche, SIGNAL(pressed()), this, SLOT(boutonGauchePressed()));
     QObject::connect(boutonGauche, SIGNAL(released()), this, SLOT(boutonGaucheReleased()));
     QObject::connect(boutonDroite, SIGNAL(pressed()), this, SLOT(boutonDroitePressed()));
