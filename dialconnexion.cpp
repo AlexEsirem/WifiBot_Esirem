@@ -1,4 +1,3 @@
-
 #include <QGridLayout>
 #include <QMessageBox>
 
@@ -31,8 +30,6 @@ DialConnexion::DialConnexion() : QWidget()
     boutonReel = new QPushButton(this);
     boutonOK = new QPushButton(this);
     boutonQuitter = new QPushButton(this);
-
-    boutonQuitter->setObjectName("boutonQuitter");
 
     // Layout : "mise en page" des différents éléments sous forme de "grille"
     QGridLayout *layoutGrid = new QGridLayout;

@@ -62,6 +62,8 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         boutonArriereDroite = new QPushButton(this);
         boutonAvantGauche = new QPushButton(this);
         boutonArriereGauche = new QPushButton(this);
+        boutonCapture = new QPushButton(this);
+        boutonOptions = new QPushButton(this);
 
         labelVitesseGauche = new QLabel(this);
         labelVitesseDroite = new QLabel(this);
@@ -77,6 +79,10 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
         boutonQuitter = new QPushButton(this);
 
+        panelCommandes = new QFrame(this);
+        panelData = new QFrame(this);
+        panelCamera = new QFrame(this);
+
         /* Donnees des elements graphiques */
         boutonAccelerer->setIcon(QIcon(":/images/icones/arrow_up.png"));
         boutonReculer->setIcon(QIcon(":/images/icones/arrow_down.png"));
@@ -87,6 +93,12 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         boutonAvantGauche->setIcon(QIcon(":/images/icones/arrow_left-up.png"));
         boutonArriereGauche->setIcon(QIcon(":/images/icones/arrow_left-down.png"));
         boutonQuitter->setIcon(QIcon(":/images/icones/close_delete.png"));
+        boutonCapture->setIcon(QIcon(":/images/icones/save_as.png"));
+        boutonOptions->setIcon(QIcon(":/images/icones/options.png"));
+
+        boutonQuitter->setToolTip("Quitter le programme");
+        boutonCapture->setToolTip("Prendre une capture d'écran");
+        boutonOptions->setToolTip("Changer les informations de connexion");
 
         labelVitesses->setText("Vitesses");
         labelVitesseGauche->setText("Gauche :");
@@ -125,15 +137,13 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         QGridLayout *layoutPrincipal = new QGridLayout;
         QGridLayout *layoutDroite = new QGridLayout;
         QGridLayout *layoutData = new QGridLayout;
-
-        panelCommandes = new QFrame(this);
-        panelData = new QFrame(this);
+        QGridLayout *layoutCamera = new QGridLayout;
 
         /* Noms des objets pour le style QSS : */
         this->setObjectName("fenetre");
         panelCommandes->setObjectName("panel");
         panelData->setObjectName("panel");
-        boutonQuitter->setObjectName("boutonQuitter");
+        panelCamera->setObjectName("panel");
         labelVitesses->setObjectName("gras");
         labelIR->setObjectName("gras");
         labelAutres->setObjectName("gras");
@@ -153,15 +163,15 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
         layoutData->addWidget(labelVitesses, 0, 0, Qt::AlignRight);
         layoutData->addWidget(labelVitesseGauche, 0, 1);
-        layoutData->addWidget(labelVitesseDroite, 1, 1);
-        layoutData->addWidget(labelIR, 2, 0, Qt::AlignRight);
-        layoutData->addWidget(labelIRGauche, 2, 1);
-        layoutData->addWidget(labelIRGauche2, 2, 2);
-        layoutData->addWidget(labelIRDroit, 3, 1);
-        layoutData->addWidget(labelIRDroit2, 3, 2);
-        layoutData->addWidget(labelAutres, 4, 0);
-        layoutData->addWidget(labelTensionBatterie, 4, 1);
-        layoutData->addWidget(labelCourant, 5, 1);
+        layoutData->addWidget(labelVitesseDroite, 0, 2);
+        layoutData->addWidget(labelIR, 1, 0, Qt::AlignRight);
+        layoutData->addWidget(labelIRGauche, 1, 1);
+        layoutData->addWidget(labelIRGauche2, 1, 2);
+        layoutData->addWidget(labelIRDroit, 2, 1);
+        layoutData->addWidget(labelIRDroit2, 2, 2);
+        layoutData->addWidget(labelAutres, 3, 0, Qt::AlignRight);
+        layoutData->addWidget(labelTensionBatterie, 3, 1);
+        layoutData->addWidget(labelCourant, 3, 2);
 
         layoutCommandes->addWidget(boutonAvantGauche, 1, 0);
         layoutCommandes->addWidget(boutonAccelerer, 1, 1);
@@ -172,18 +182,26 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         layoutCommandes->addWidget(boutonReculer, 3, 1);
         layoutCommandes->addWidget(boutonArriereDroite, 3, 2);
 
+        layoutCamera->addWidget(boutonCapture, 0, 0, Qt::AlignTop|Qt::AlignLeft);
+
         layoutDroite->setVerticalSpacing(30);
 
-        panelCommandes->setLayout(layoutCommandes);
-        // On met la largeur du panelData à la même largeur que le panelCommandes : */
-        panelData->setMinimumWidth(panelCommandes->sizeHint().width());
+        panelCamera->setLayout(layoutCamera);
         panelData->setLayout(layoutData);
+        panelCommandes->setLayout(layoutCommandes);
 
-        layoutDroite->addWidget(panelCommandes,0,0, Qt::AlignCenter|Qt::AlignTop);
-        layoutDroite->addWidget(separateurH1, 1, 0);
-        layoutDroite->addWidget(panelData, 2, 0, Qt::AlignCenter);
-        layoutDroite->addWidget(separateurH2, 3, 0);
-        layoutDroite->addWidget(boutonQuitter, 4,0, Qt::AlignBottom|Qt::AlignRight);
+        panelCamera->setMinimumSize(panelCommandes->sizeHint());
+
+        layoutDroite->addWidget(panelCamera,0,0, Qt::AlignLeft|Qt::AlignTop);
+        layoutDroite->addWidget(panelCommandes,0,1, Qt::AlignRight|Qt::AlignTop);
+        layoutDroite->addWidget(separateurH1, 1, 0, 1, 2);
+        layoutDroite->addWidget(panelData, 2, 0, 1, 2, Qt::AlignCenter);
+        layoutDroite->addWidget(separateurH2, 3, 0, 1, 2);
+        layoutDroite->addWidget(boutonOptions, 4, 0, Qt::AlignBottom|Qt::AlignLeft);
+        layoutDroite->addWidget(boutonQuitter, 4, 1, Qt::AlignBottom|Qt::AlignRight);
+
+        panelData->setMinimumWidth(2*panelCommandes->sizeHint().width()+20);
+        frameWeb->setMinimumWidth((4/3)*frameWeb->sizeHint().height());
 
         layoutPrincipal->addLayout(layoutDroite, 0,1);
         layoutPrincipal->addWidget(frameWeb, 0,0);
@@ -191,10 +209,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         /* Application du layout à cette fenêtre */
         this->setLayout(layoutPrincipal);
 
-
         /* Liaison entre les boutons de l'interface et les actions à effectuer :
          * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
         QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
+        QObject::connect(boutonOptions, SIGNAL(clicked()), this, SLOT(boutonOptionsClicked()));
+
         QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
         QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonAccelererReleased()));
         QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerPressed()));
@@ -211,6 +230,8 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         QObject::connect(boutonArriereGauche, SIGNAL(released()), this, SLOT(boutonArriereGaucheReleased()));
         QObject::connect(boutonArriereDroite, SIGNAL(pressed()), this, SLOT(boutonArriereDroitePressed()));
         QObject::connect(boutonArriereDroite, SIGNAL(released()), this, SLOT(boutonArriereDroiteReleased()));
+
+        QObject::connect(boutonCapture, SIGNAL(clicked()), this, SLOT(boutonCaptureClicked()));
 
         /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
         QObject::connect(tCommunication, SIGNAL(sensorDataChanged()), this, SLOT(updateDataLabels()));
@@ -349,6 +370,23 @@ void FenetrePrincipale::majCommandeFromFlags()
  * SLOTS : actions effectuees lorsqu'un evemenement a lieu
  ***************************/
 
+void FenetrePrincipale::boutonCaptureClicked()
+{
+    //pageWeb->page()->setViewportSize(pageWeb->page()->currentFrame()->contentsSize());
+    QImage img(pageWeb->page()->viewportSize(), QImage::Format_ARGB32);
+    QPainter paintView(&img);
+    pageWeb->page()->currentFrame()->render(&paintView);
+    paintView.end();
+
+    QString imgFileName = QDir::homePath() + "/Desktop/Wifibot_capture_" + QDateTime::currentDateTime().toString("dd-MM-yyyy_hh'h'mm'm'ss's'") + ".jpg";
+    img.save(imgFileName);
+
+    QMessageBox *message = new QMessageBox();
+    message->setText("Image enregistrée sous : " + imgFileName);
+    message->setWindowModality(Qt::NonModal);
+    message->show();
+}
+
 /**
  * @brief FenetrePrincipale::updateDataLabels
  * Slot appelé lorsque le thread de communication a recu de nouvelles données du robot.
@@ -481,7 +519,22 @@ void FenetrePrincipale::boutonArriereDroiteReleased()
     majCommandeFromFlags();
 }
 
-
+/**
+ * @brief FenetrePrincipale::boutonOptionsClicked
+ * Ferme la fenetre et le thread de communication
+ * Ouvre un nouveau dialogue de connexion
+ */
+void FenetrePrincipale::boutonOptionsClicked()
+{
+    // Ferme cette fenetre et ouvre le dialogue de connexion :
+    DialConnexion *fenetreConnexion = new DialConnexion;
+    fenetreConnexion->show();
+    // Fermer les threads et attendre leur fin (join())
+    tCommunication->terminate();
+    tCommunication->wait(5000);
+    // Ferme la fenetre :
+    close();
+}
 
 /**
  * Quitte le programme lorsque le bouton quitter est clique

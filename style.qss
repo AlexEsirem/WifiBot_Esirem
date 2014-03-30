@@ -32,7 +32,7 @@ QFrame#panel QLabel {
 }
 
 /* Boutons :*/
-QPushButton {
+QWidget#fenetre QPushButton {
     background: rgb(18,49,66);
     color: rgb(233,240,221);
     border-style: inset;
@@ -44,11 +44,19 @@ QPushButton {
     margin: 5px;
 }
 /* Boutons appuyés */
-QPushButton:pressed {
+QWidget#fenetre QPushButton:pressed {
     border-style: outset;
 }
 /* Boutons survolés */
-QPushButton:hover {
+QWidget#fenetre QPushButton:hover {
     background: rgb(28,59,76);
 }
+/* Boutons dans des panels (ils sont carrés) :*/
+QFrame#panel QPushButton {
+    min-height: 50px; max-height: 50px;
+    min-width: 50px; max-width: 50px;
+}
+
+
+
 

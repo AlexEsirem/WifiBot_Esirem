@@ -10,6 +10,8 @@
         <file>icones/arrow_up.png</file>
         <file>icones/close_delete.png</file>
         <file>icones/check.png</file>
+        <file>icones/save_as.png</file>
+        <file>icones/options.png</file>
     </qresource>
     <qresource prefix="/style">
         <file>style.qss</file>

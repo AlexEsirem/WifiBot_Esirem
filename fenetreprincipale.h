@@ -54,6 +54,9 @@ public slots:
     void boutonArriereDroiteReleased();
 
     void boutonQuitterClicked();
+    void boutonOptionsClicked();
+
+    void boutonCaptureClicked();
 
 private:
     /* Donnees reseau */
@@ -79,6 +82,8 @@ private:
     QPushButton *boutonArriereDroite;
     QPushButton *boutonArriereGauche;
     QPushButton *boutonQuitter;
+    QPushButton *boutonCapture;
+    QPushButton *boutonOptions;
 
     QLabel *labelVitesseGauche;
     QLabel *labelVitesseDroite;
@@ -93,6 +98,7 @@ private:
     QLabel *labelCourant;
 
     QFrame *panelCommandes;
+    QFrame *panelCamera;
     QFrame *panelData;
 
     /* Elements Web pour la caméra */
