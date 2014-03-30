@@ -2,9 +2,12 @@
 #include <QFont>
 #include <QPalette>
 #include <QKeyEvent>
+#include <QWebFrame>
+#include <QMessageBox>
 
 #include "fenetreprincipale.h"
 #include "Const.h"
+#include "dialconnexion.h"
 
 /* L'entier commande est utilisé en global.
  * Il est partagé entre la FenetrePrincipale qui le modifiera en fonction des
@@ -23,13 +26,10 @@ int commande;
  */
 FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 {
-    this->setWindowTitle("WifiBot Control");
-
-    QFont police("Trebuchet MS", 12);
-    this->setFont(police);
+    this->setWindowTitle("Contrôle du WifiBot");
 
     /* Initialisation des elements de fonctionnement : */
-    commande = RIEN;    // initialement aucune commande n'est demandé, donc RIEN
+    commande = RIEN;    // initialement aucune commande n'est demandée
     ip = ipRobot;
     port = portRobot;
 
@@ -37,162 +37,192 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
     tCommunication = new ThreadCommunication(ip, port);
     tCommunication->start();
 
-    /* Initialisation des flags des touchess clavier. On considère qu'aucune n'est appuyée au début. */
-    keyUp = false;
-    keyDown = false;
-    keyLeft = false;
-    keyRight = false;
+    while(tCommunication->getConnecte() == 0)
+    {
+        QMutex mutex;
+        mutex.lock();
+        QWaitCondition waitCondition;
+        waitCondition.wait(&mutex, 50);
+    }
 
-    /* Création des elements graphiques : */
-    boutonAccelerer = new QPushButton(this);
-    boutonReculer = new QPushButton(this);
-    boutonGauche = new QPushButton(this);
-    boutonDroite = new QPushButton(this);
-    boutonAvantDroite = new QPushButton(this);
-    boutonArriereDroite = new QPushButton(this);
-    boutonAvantGauche = new QPushButton(this);
-    boutonArriereGauche = new QPushButton(this);
+    if(tCommunication->getConnecte() == 1)
+    {
+        /* Initialisation des flags des touchess clavier. On considère qu'aucune n'est appuyée au début. */
+        keyUp = false;
+        keyDown = false;
+        keyLeft = false;
+        keyRight = false;
 
-    labelVitesseGauche = new QLabel(this);
-    labelVitesseDroite = new QLabel(this);
-    labelTensionBatterie = new QLabel(this);
-    labelIRGauche = new QLabel(this);
-    labelIRGauche2 = new QLabel(this);
-    labelIRDroit = new QLabel(this);
-    labelIRDroit2 = new QLabel(this);
-    labelIR = new QLabel(this);
-    labelVitesses = new QLabel(this);
-    labelCourant = new QLabel(this);
+        /* Création des elements graphiques : */
+        boutonAccelerer = new QPushButton(this);
+        boutonReculer = new QPushButton(this);
+        boutonGauche = new QPushButton(this);
+        boutonDroite = new QPushButton(this);
+        boutonAvantDroite = new QPushButton(this);
+        boutonArriereDroite = new QPushButton(this);
+        boutonAvantGauche = new QPushButton(this);
+        boutonArriereGauche = new QPushButton(this);
 
-    boutonQuitter = new QPushButton(this);
+        labelVitesseGauche = new QLabel(this);
+        labelVitesseDroite = new QLabel(this);
+        labelTensionBatterie = new QLabel(this);
+        labelIRGauche = new QLabel(this);
+        labelIRGauche2 = new QLabel(this);
+        labelIRDroit = new QLabel(this);
+        labelIRDroit2 = new QLabel(this);
+        labelIR = new QLabel(this);
+        labelVitesses = new QLabel(this);
+        labelCourant = new QLabel(this);
+        labelAutres = new QLabel(this);
 
-    /* Donnees des elements graphiques */
-    boutonAccelerer->setText("Accelerer");
-    boutonReculer->setText("Reculer");
-    boutonGauche->setText("Gauche");
-    boutonDroite->setText("Droite");
-    boutonAvantDroite->setText("Av.Droite");
-    boutonArriereDroite->setText("Ar.Droite");
-    boutonAvantGauche->setText("Av.Gauche");
-    boutonArriereGauche->setText("Ar.Gauche");
-    boutonQuitter->setText("Quitter");
+        boutonQuitter = new QPushButton(this);
 
-    boutonAccelerer->setFixedSize(100,40);
-    boutonReculer->setFixedSize(100,40);
-    boutonGauche->setFixedSize(100,40);
-    boutonDroite->setFixedSize(100,40);
-    boutonAvantDroite->setFixedSize(100,40);
-    boutonArriereDroite->setFixedSize(100,40);
-    boutonAvantGauche->setFixedSize(100,40);
-    boutonArriereGauche->setFixedSize(100,40);
-    boutonQuitter->setFixedSize(100,40);
+        /* Donnees des elements graphiques */
+        boutonAccelerer->setIcon(QIcon(":/images/icones/arrow_up.png"));
+        boutonReculer->setIcon(QIcon(":/images/icones/arrow_down.png"));
+        boutonGauche->setIcon(QIcon(":/images/icones/arrow_left.png"));
+        boutonDroite->setIcon(QIcon(":/images/icones/arrow_right.png"));
+        boutonAvantDroite->setIcon(QIcon(":/images/icones/arrow_right-up.png"));
+        boutonArriereDroite->setIcon(QIcon(":/images/icones/arrow_right-down.png"));
+        boutonAvantGauche->setIcon(QIcon(":/images/icones/arrow_left-up.png"));
+        boutonArriereGauche->setIcon(QIcon(":/images/icones/arrow_left-down.png"));
+        boutonQuitter->setIcon(QIcon(":/images/icones/close_delete.png"));
 
-    QFont policeGras("Trebuchet MS", 14, QFont::Bold);
-    labelVitesses->setFont(policeGras);
-    labelVitesses->setText("Vitesses");
-    labelVitesseGauche->setText("Gauche :");
-    labelVitesseDroite->setText("Droite :");
-    labelTensionBatterie->setText("Batterie :");
-    labelIR->setFont(policeGras);
-    labelIR->setText("Infrarouges");
-    labelIRGauche->setText("Gauche :");
-    labelIRGauche2->setText("Gauche 2 :");
-    labelIRDroit->setText("Droite :");
-    labelIRDroit2->setText("Droite 2 :");
-    labelCourant->setText("Courant :");
+        labelVitesses->setText("Vitesses");
+        labelVitesseGauche->setText("Gauche :");
+        labelVitesseDroite->setText("Droite :");
+        labelTensionBatterie->setText("Batterie :");
+        labelIR->setText("Infrarouges");
+        labelIRGauche->setText("Gauche :");
+        labelIRGauche2->setText("Gauche 2 :");
+        labelIRDroit->setText("Droite :");
+        labelIRDroit2->setText("Droite 2 :");
+        labelCourant->setText("Courant :");
+        labelAutres->setText("Autres");
 
-    /* Elements de page Web pour la camera : */
-    pageWeb = new QWebView(this);
-    pageWeb->setFocusPolicy(Qt::NoFocus);
-    pageWeb->load(QUrl("http://qt-project.org"));
+        /* Elements de page Web pour la camera : */
+        pageWeb = new QWebView(this);
+        pageWeb->setFocusPolicy(Qt::NoFocus);
+        pageWeb->load(QUrl("http://google.com"));
 
-    /* On utilisera 4 layouts :
-     * - Un principal qui contiendra tous les éléments
-     * - Un de droite qui contiendra les layouts commandes et data
-     * - un layout commandes qui regroupe les boutons
-     * - un layout data qui regroupe les éléments d'affichage des données des capteurs */
-    QGridLayout *layoutCommandes = new QGridLayout;
-    QGridLayout *layoutPrincipal = new QGridLayout;
-    QGridLayout *layoutDroite = new QGridLayout;
-    QGridLayout *layoutData = new QGridLayout;
+        QFrame *frameWeb = new QFrame(this);
+        QGridLayout *layoutWeb = new QGridLayout;
+        layoutWeb->addWidget(pageWeb);
+        layoutWeb->setContentsMargins(0,0,0,0);
+        frameWeb->setLayout(layoutWeb);
+        frameWeb->setObjectName("panel");
 
-    /* Deux séparateurs pour l'esthétique */
-    QFrame* separateurH1 = new QFrame(this);
-    separateurH1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-    separateurH1->show();
+        /* Désactivation de la barre de défilement  de la page web : */
+        pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+        pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
 
-    QFrame* separateurH2 = new QFrame(this);
-    separateurH2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
-    separateurH2->show();
+        /* On utilisera 4 layouts :
+         * - Un principal qui contiendra tous les éléments
+         * - Un de droite qui contiendra les layouts commandes et data
+         * - un layout commandes qui regroupe les boutons
+         * - un layout data qui regroupe les éléments d'affichage des données des capteurs */
+        QGridLayout *layoutCommandes = new QGridLayout;
+        QGridLayout *layoutPrincipal = new QGridLayout;
+        QGridLayout *layoutDroite = new QGridLayout;
+        QGridLayout *layoutData = new QGridLayout;
 
-    /* Configuration des layout et ajout des éléments */
-    layoutData->setVerticalSpacing(10);
-    layoutData->setHorizontalSpacing(30);
+        panelCommandes = new QFrame(this);
+        panelData = new QFrame(this);
 
-    layoutData->addWidget(labelVitesses, 0, 0, Qt::AlignRight);
-    layoutData->addWidget(labelVitesseGauche, 0, 1);
-    layoutData->addWidget(labelVitesseDroite, 1, 1);
-    layoutData->addWidget(labelIR, 2, 0, Qt::AlignRight);
-    layoutData->addWidget(labelIRGauche, 2, 1);
-    layoutData->addWidget(labelIRGauche2, 2, 2);
-    layoutData->addWidget(labelIRDroit, 3, 1);
-    layoutData->addWidget(labelIRDroit2, 3, 2);
-    layoutData->addWidget(labelTensionBatterie, 4, 0, 1, 2);
-    layoutData->addWidget(labelCourant, 5, 0);
+        /* Noms des objets pour le style QSS : */
+        this->setObjectName("fenetre");
+        panelCommandes->setObjectName("panel");
+        panelData->setObjectName("panel");
+        boutonQuitter->setObjectName("boutonQuitter");
+        labelVitesses->setObjectName("gras");
+        labelIR->setObjectName("gras");
+        labelAutres->setObjectName("gras");
 
-    layoutCommandes->addWidget(boutonAvantGauche, 1, 0);
-    layoutCommandes->addWidget(boutonAccelerer, 1, 1);
-    layoutCommandes->addWidget(boutonAvantDroite, 1, 2);
-    layoutCommandes->addWidget(boutonGauche, 2, 0);
-    layoutCommandes->addWidget(boutonDroite, 2, 2);
-    layoutCommandes->addWidget(boutonArriereGauche, 3, 0);
-    layoutCommandes->addWidget(boutonReculer, 3, 1);
-    layoutCommandes->addWidget(boutonArriereDroite, 3, 2);
+        /* Deux séparateurs pour l'esthétique */
+        QFrame* separateurH1 = new QFrame(this);
+        separateurH1->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+        separateurH1->show();
 
-    layoutDroite->setVerticalSpacing(30);
+        QFrame* separateurH2 = new QFrame(this);
+        separateurH2->setFrameStyle(QFrame::HLine | QFrame::Sunken);
+        separateurH2->show();
 
-    layoutDroite->addLayout(layoutCommandes,0,0, Qt::AlignRight|Qt::AlignTop);
-    layoutDroite->addWidget(separateurH1, 1, 0);
-    layoutDroite->addLayout(layoutData, 2, 0, Qt::AlignLeft);
-    layoutDroite->addWidget(separateurH2, 3, 0);
-    layoutDroite->addWidget(boutonQuitter, 4,0, Qt::AlignBottom|Qt::AlignRight);
+        /* Configuration des layout et ajout des éléments */
+        layoutData->setVerticalSpacing(10);
+        layoutData->setHorizontalSpacing(30);
 
-    layoutPrincipal->addLayout(layoutDroite, 0,1);
+        layoutData->addWidget(labelVitesses, 0, 0, Qt::AlignRight);
+        layoutData->addWidget(labelVitesseGauche, 0, 1);
+        layoutData->addWidget(labelVitesseDroite, 1, 1);
+        layoutData->addWidget(labelIR, 2, 0, Qt::AlignRight);
+        layoutData->addWidget(labelIRGauche, 2, 1);
+        layoutData->addWidget(labelIRGauche2, 2, 2);
+        layoutData->addWidget(labelIRDroit, 3, 1);
+        layoutData->addWidget(labelIRDroit2, 3, 2);
+        layoutData->addWidget(labelAutres, 4, 0);
+        layoutData->addWidget(labelTensionBatterie, 4, 1);
+        layoutData->addWidget(labelCourant, 5, 1);
 
-    layoutPrincipal->addWidget(pageWeb, 0,0);
+        layoutCommandes->addWidget(boutonAvantGauche, 1, 0);
+        layoutCommandes->addWidget(boutonAccelerer, 1, 1);
+        layoutCommandes->addWidget(boutonAvantDroite, 1, 2);
+        layoutCommandes->addWidget(boutonGauche, 2, 0);
+        layoutCommandes->addWidget(boutonDroite, 2, 2);
+        layoutCommandes->addWidget(boutonArriereGauche, 3, 0);
+        layoutCommandes->addWidget(boutonReculer, 3, 1);
+        layoutCommandes->addWidget(boutonArriereDroite, 3, 2);
 
-    /* Application du layout à cette fenêtre */
-    this->setLayout(layoutPrincipal);
+        layoutDroite->setVerticalSpacing(30);
 
+        panelCommandes->setLayout(layoutCommandes);
+        // On met la largeur du panelData à la même largeur que le panelCommandes : */
+        panelData->setMinimumWidth(panelCommandes->sizeHint().width());
+        panelData->setLayout(layoutData);
 
+        layoutDroite->addWidget(panelCommandes,0,0, Qt::AlignCenter|Qt::AlignTop);
+        layoutDroite->addWidget(separateurH1, 1, 0);
+        layoutDroite->addWidget(panelData, 2, 0, Qt::AlignCenter);
+        layoutDroite->addWidget(separateurH2, 3, 0);
+        layoutDroite->addWidget(boutonQuitter, 4,0, Qt::AlignBottom|Qt::AlignRight);
 
+        layoutPrincipal->addLayout(layoutDroite, 0,1);
+        layoutPrincipal->addWidget(frameWeb, 0,0);
 
-
-
-    /* Liaison entre les boutons de l'interface et les actions à effectuer :
-     * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
-    QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
-    QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
-    QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonAccelererReleased()));
-    QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerPressed()));
-    QObject::connect(boutonReculer, SIGNAL(released()), this, SLOT(boutonReculerReleased()));
-    QObject::connect(boutonGauche, SIGNAL(pressed()), this, SLOT(boutonGauchePressed()));
-    QObject::connect(boutonGauche, SIGNAL(released()), this, SLOT(boutonGaucheReleased()));
-    QObject::connect(boutonDroite, SIGNAL(pressed()), this, SLOT(boutonDroitePressed()));
-    QObject::connect(boutonDroite, SIGNAL(released()), this, SLOT(boutonDroiteReleased()));
-    QObject::connect(boutonAvantGauche, SIGNAL(pressed()), this, SLOT(boutonAvantGauchePressed()));
-    QObject::connect(boutonAvantGauche, SIGNAL(released()), this, SLOT(boutonAvantGaucheReleased()));
-    QObject::connect(boutonAvantDroite, SIGNAL(pressed()), this, SLOT(boutonAvantDroitePressed()));
-    QObject::connect(boutonAvantDroite, SIGNAL(released()), this, SLOT(boutonAvantDroiteReleased()));
-    QObject::connect(boutonArriereGauche, SIGNAL(pressed()), this, SLOT(boutonArriereGauchePressed()));
-    QObject::connect(boutonArriereGauche, SIGNAL(released()), this, SLOT(boutonArriereGaucheReleased()));
-    QObject::connect(boutonArriereDroite, SIGNAL(pressed()), this, SLOT(boutonArriereDroitePressed()));
-    QObject::connect(boutonArriereDroite, SIGNAL(released()), this, SLOT(boutonArriereDroiteReleased()));
-
-    /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
-    QObject::connect(tCommunication, SIGNAL(sensorDataChanged()), this, SLOT(updateDataLabels()));
+        /* Application du layout à cette fenêtre */
+        this->setLayout(layoutPrincipal);
 
 
+        /* Liaison entre les boutons de l'interface et les actions à effectuer :
+         * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
+        QObject::connect(boutonQuitter, SIGNAL(clicked()), this, SLOT(boutonQuitterClicked()));
+        QObject::connect(boutonAccelerer, SIGNAL(pressed()), this, SLOT(boutonAccelererPressed()));
+        QObject::connect(boutonAccelerer, SIGNAL(released()), this, SLOT(boutonAccelererReleased()));
+        QObject::connect(boutonReculer, SIGNAL(pressed()), this, SLOT(boutonReculerPressed()));
+        QObject::connect(boutonReculer, SIGNAL(released()), this, SLOT(boutonReculerReleased()));
+        QObject::connect(boutonGauche, SIGNAL(pressed()), this, SLOT(boutonGauchePressed()));
+        QObject::connect(boutonGauche, SIGNAL(released()), this, SLOT(boutonGaucheReleased()));
+        QObject::connect(boutonDroite, SIGNAL(pressed()), this, SLOT(boutonDroitePressed()));
+        QObject::connect(boutonDroite, SIGNAL(released()), this, SLOT(boutonDroiteReleased()));
+        QObject::connect(boutonAvantGauche, SIGNAL(pressed()), this, SLOT(boutonAvantGauchePressed()));
+        QObject::connect(boutonAvantGauche, SIGNAL(released()), this, SLOT(boutonAvantGaucheReleased()));
+        QObject::connect(boutonAvantDroite, SIGNAL(pressed()), this, SLOT(boutonAvantDroitePressed()));
+        QObject::connect(boutonAvantDroite, SIGNAL(released()), this, SLOT(boutonAvantDroiteReleased()));
+        QObject::connect(boutonArriereGauche, SIGNAL(pressed()), this, SLOT(boutonArriereGauchePressed()));
+        QObject::connect(boutonArriereGauche, SIGNAL(released()), this, SLOT(boutonArriereGaucheReleased()));
+        QObject::connect(boutonArriereDroite, SIGNAL(pressed()), this, SLOT(boutonArriereDroitePressed()));
+        QObject::connect(boutonArriereDroite, SIGNAL(released()), this, SLOT(boutonArriereDroiteReleased()));
+
+        /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
+        QObject::connect(tCommunication, SIGNAL(sensorDataChanged()), this, SLOT(updateDataLabels()));
+
+        /* La création s'est passée sans problème */
+        valid = true;
+    }
+    else
+    {
+        /* il y a eu un problème de connexion */
+        valid = false;
+    }
 }
 
 /************************
@@ -453,7 +483,6 @@ void FenetrePrincipale::boutonArriereDroiteReleased()
 
 
 
-
 /**
  * Quitte le programme lorsque le bouton quitter est clique
  * L'appel a terminate() permet au thread de communication de fermer son socket et de se terminer proprement.
@@ -469,6 +498,10 @@ void FenetrePrincipale::boutonQuitterClicked()
     close();
 }
 
+bool FenetrePrincipale::isValid()
+{
+    return valid;
+}
 
 
 

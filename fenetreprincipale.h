@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <QSlider>
 
-#include "pageweb.h"
 #include <QWebView>
 #include <QtWebKit>
 
@@ -33,6 +32,7 @@ public:
     void keyPressEvent(QKeyEvent *event);
     void keyReleaseEvent(QKeyEvent *event);
     void majCommandeFromFlags();
+    bool isValid();
 
 public slots:
     void updateDataLabels();
@@ -60,6 +60,9 @@ private:
     QString ip;
     int port;
 
+    /* Flag pour indiquer si il y a une erreur ou non lors de la création de la fenetre */
+    bool valid;
+
     /* flags clavier. Permettent de savoir quelles touches clavier sont pressees à chaque instant */
     bool keyUp;
     bool keyDown;
@@ -85,8 +88,12 @@ private:
     QLabel *labelIRDroit;
     QLabel *labelIRDroit2;
     QLabel *labelIR;
+    QLabel *labelAutres;
     QLabel *labelVitesses;
     QLabel *labelCourant;
+
+    QFrame *panelCommandes;
+    QFrame *panelData;
 
     /* Elements Web pour la caméra */
     QWebView *pageWeb;

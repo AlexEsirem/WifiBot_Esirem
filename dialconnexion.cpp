@@ -15,6 +15,8 @@ DialConnexion::DialConnexion() : QWidget()
 {
     this->setWindowTitle("Connexion au robot");
 
+    this->setObjectName("fenetre");
+
     ip = "";
     port = -1;
 
@@ -30,6 +32,8 @@ DialConnexion::DialConnexion() : QWidget()
     boutonOK = new QPushButton(this);
     boutonQuitter = new QPushButton(this);
 
+    boutonQuitter->setObjectName("boutonQuitter");
+
     // Layout : "mise en page" des différents éléments sous forme de "grille"
     QGridLayout *layoutGrid = new QGridLayout;
 
@@ -38,8 +42,8 @@ DialConnexion::DialConnexion() : QWidget()
     labelChoixPort->setText("Port");
     boutonSimulateur->setText("Simulateur");
     boutonReel->setText("Robot");
-    boutonOK->setText("OK");
-    boutonQuitter->setText("Quitter");
+    boutonOK->setIcon(QIcon(":/images/icones/check.png"));
+    boutonQuitter->setIcon(QIcon(":/images/icones/close_delete.png"));
 
     // Ajout des éléments au layout :
     layoutGrid->addWidget(labelChoixIP, 0,0);
@@ -48,11 +52,12 @@ DialConnexion::DialConnexion() : QWidget()
     layoutGrid->addWidget(champPort, 1, 1, 1, 2);
     layoutGrid->addWidget(boutonSimulateur, 2, 1);
     layoutGrid->addWidget(boutonReel, 2, 2);
-    layoutGrid->addWidget(boutonQuitter, 3, 0);
+    layoutGrid->addWidget(boutonQuitter, 3, 1);
     layoutGrid->addWidget(boutonOK, 3, 2);
 
-    // application du layout à cette fenêtre :
+    // application du layout à cette fenêtre et taille fixe de la fenetre :
     this->setLayout(layoutGrid);
+    this->layout()->setSizeConstraint( QLayout::SetFixedSize );
 
     /* Liaison entre les boutons de l'interface et les actions à effectuer :
      * Si un SIGNAL est émis, alors la fonction SLOT correspondante est exécutée. */
@@ -99,8 +104,17 @@ void DialConnexion::boutonOKClicked()
          * Fermer ce dialogue et afficher la fenetre principale
          */
         FenetrePrincipale *fenetre = new FenetrePrincipale(champIP->text(), champPort->text().toInt(0, 10));
-        fenetre->show();
-        this->close();
+        if(fenetre->isValid())
+        {
+            fenetre->show();
+            this->close();
+        }
+        else
+        {
+            QMessageBox *message = new QMessageBox();
+            message->setText("La connexion a échoué. Vérifiez les informations.");
+            message->exec();
+        }
     }
 }
 

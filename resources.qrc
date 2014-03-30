@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>icones/arrow_down.png</file>
+        <file>icones/arrow_left-down.png</file>
+        <file>icones/arrow_left-up.png</file>
+        <file>icones/arrow_left.png</file>
+        <file>icones/arrow_right-down.png</file>
+        <file>icones/arrow_right-up.png</file>
+        <file>icones/arrow_right.png</file>
+        <file>icones/arrow_up.png</file>
+        <file>icones/close_delete.png</file>
+        <file>icones/check.png</file>
+    </qresource>
+    <qresource prefix="/style">
+        <file>style.qss</file>
+    </qresource>
+</RCC>

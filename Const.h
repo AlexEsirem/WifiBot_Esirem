@@ -1,6 +1,8 @@
 #ifndef CONST_H
 #define CONST_H
 
+#include <QString>
+
 /* Fichier de constantes. Elles sont utilisées pour la clarté et une meilleure
  * compréhension du programme. On utilisera par exemple AVANT_GAUCHE au lieu de 4, pour indiquer
  * qu'on veut aller a gauche en avancant.

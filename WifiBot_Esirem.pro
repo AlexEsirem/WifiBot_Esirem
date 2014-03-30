@@ -16,3 +16,9 @@ SOURCES += \
     sensordata.cpp \
     threadcommunication.cpp \
     WifiBot.cpp
+
+OTHER_FILES += \
+    style.qss
+
+RESOURCES += \
+    resources.qrc

@@ -4,6 +4,7 @@
 
 #include "threadcommunication.h"
 #include "Const.h"
+#include "dialconnexion.h"
 
 using namespace std;
 
@@ -24,6 +25,23 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
     ip = ipRobot;
     port = portRobot;
 
+    /* Creation du socket TCP : */
+    socket = new QTcpSocket(this);
+
+    /* Connexion du socket à l'ip/port demandé.
+     * On attend ensuite la connexion pendant 5 sec max.
+     * Si la connexion est établie (1), c'est bon
+     * Sinon (!=1), alors on affiche un message d'erreur et on quitte l'application. */
+    socket->connectToHost(ip, port);
+    if(socket->waitForConnected(SOCK_TIMEOUT))
+     {
+        connecte = 1;
+    }
+    else
+    {
+        connecte = -1;
+    }
+
     /* On détermine si on travaille avec le robot ou le simulateur. La taille du buffer d'envoi en dépend */
     if(ip == IP_REEL)
         bufferEnvoi = new char[9];
@@ -40,25 +58,6 @@ ThreadCommunication::ThreadCommunication(QString ipRobot, int portRobot) : QThre
 
     /* Création de l'objet SensorData pour stocker les infos des capteurs */
     capteurs = new SensorData();
-
-    /* Creation du socket TCP : */
-    socket = new QTcpSocket(this);
-
-    /* Connexion du socket à l'ip/port demandé.
-     * On attend ensuite la connexion pendant 5 sec max.
-     * Si la connexion est établie (1), c'est bon
-     * Sinon (!=1), alors on affiche un message d'erreur et on quitte l'application. */
-    socket->connectToHost(ip, port);
-    if(socket->waitForConnected(SOCK_TIMEOUT))
-        connecte = 1;
-    else
-    {
-        connecte = -1;
-        QMessageBox *message = new QMessageBox();
-        message->setText("La connexion a échoué. Vérifiez les informations.");
-        message->exec();
-        QApplication::quit();
-    }
 
     /* Liaison du signal "socket déconnecté" avec le slot "connexion perdue". */
     QObject::connect(socket, SIGNAL(disconnected()), this, SLOT(connexionPerdue()));
