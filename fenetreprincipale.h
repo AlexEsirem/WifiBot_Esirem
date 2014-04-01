@@ -58,6 +58,11 @@ public slots:
 
     void boutonCaptureClicked();
 
+    void boutonCamUpClicked();
+    void boutonCamDownClicked();
+    void boutonCamLeftClicked();
+    void boutonCamRightClicked();
+
 private:
     /* Donnees reseau */
     QString ip;
@@ -84,6 +89,10 @@ private:
     QPushButton *boutonQuitter;
     QPushButton *boutonCapture;
     QPushButton *boutonOptions;
+    QPushButton *boutonCamUp;
+    QPushButton *boutonCamDown;
+    QPushButton *boutonCamLeft;
+    QPushButton *boutonCamRight;
 
     QLabel *labelVitesseGauche;
     QLabel *labelVitesseDroite;
@@ -103,6 +112,7 @@ private:
 
     /* Elements Web pour la caméra */
     QWebView *pageWeb;
+    QNetworkAccessManager *camControl;
 
     /* thread de communication. Se chargera d'échanger avec le robot */
     ThreadCommunication *tCommunication;

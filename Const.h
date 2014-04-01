@@ -38,4 +38,10 @@
 #define EN_ARRIERE 0
 #define SUR_PLACE 2
 
+/* Constantes pour les actions de la camera */
+#define CAM_UP "/?action=command&dest=0&plugin=0&id=10094853&group=1&value=-200"
+#define CAM_DOWN "/?action=command&dest=0&plugin=0&id=10094853&group=1&value=200"
+#define CAM_LEFT "/?action=command&dest=0&plugin=0&id=10094852&group=1&value=200"
+#define CAM_RIGHT "/?action=command&dest=0&plugin=0&id=10094852&group=1&value=-200"
+
 #endif // CONST_H

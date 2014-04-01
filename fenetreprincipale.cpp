@@ -64,6 +64,10 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         boutonArriereGauche = new QPushButton(this);
         boutonCapture = new QPushButton(this);
         boutonOptions = new QPushButton(this);
+        boutonCamUp = new QPushButton(this);
+        boutonCamDown = new QPushButton(this);
+        boutonCamLeft = new QPushButton(this);
+        boutonCamRight = new QPushButton(this);
 
         labelVitesseGauche = new QLabel(this);
         labelVitesseDroite = new QLabel(this);
@@ -115,7 +119,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         /* Elements de page Web pour la camera : */
         pageWeb = new QWebView(this);
         pageWeb->setFocusPolicy(Qt::NoFocus);
-        pageWeb->load(QUrl("http://google.com"));
+        QString addrCam = "http://" + ip + ":8080/javascript_simple.html";
+        pageWeb->load(QUrl(addrCam));
+
+        // Accesseur Web pour les requetes de deplacement de la caméra :
+        camControl = new QNetworkAccessManager(this);
 
         QFrame *frameWeb = new QFrame(this);
         QGridLayout *layoutWeb = new QGridLayout;
@@ -127,6 +135,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         /* Désactivation de la barre de défilement  de la page web : */
         pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
         pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
+        pageWeb->page()->mainFrame()->setZoomFactor(1.6);
 
         /* On utilisera 4 layouts :
          * - Un principal qui contiendra tous les éléments
@@ -182,7 +191,11 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         layoutCommandes->addWidget(boutonReculer, 3, 1);
         layoutCommandes->addWidget(boutonArriereDroite, 3, 2);
 
-        layoutCamera->addWidget(boutonCapture, 0, 0, Qt::AlignTop|Qt::AlignLeft);
+        layoutCamera->addWidget(boutonCamUp, 0, 1);
+        layoutCamera->addWidget(boutonCamLeft, 1, 0);
+        layoutCamera->addWidget(boutonCapture, 1, 1);
+        layoutCamera->addWidget(boutonCamRight, 1, 2);
+        layoutCamera->addWidget(boutonCamDown, 2, 1);
 
         layoutDroite->setVerticalSpacing(30);
 
@@ -201,10 +214,13 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         layoutDroite->addWidget(boutonQuitter, 4, 1, Qt::AlignBottom|Qt::AlignRight);
 
         panelData->setMinimumWidth(2*panelCommandes->sizeHint().width()+20);
-        frameWeb->setMinimumWidth((4/3)*frameWeb->sizeHint().height());
+        frameWeb->setMinimumWidth(1.7*320);
+        frameWeb->setMaximumHeight(1.8*240);
+
+        //frameWeb->setMinimumWidth((4/3)*frameWeb->sizeHint().height());
 
         layoutPrincipal->addLayout(layoutDroite, 0,1);
-        layoutPrincipal->addWidget(frameWeb, 0,0);
+        layoutPrincipal->addWidget(frameWeb, 0,0, Qt::AlignTop|Qt::AlignLeft);
 
         /* Application du layout à cette fenêtre */
         this->setLayout(layoutPrincipal);
@@ -231,6 +247,10 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         QObject::connect(boutonArriereDroite, SIGNAL(pressed()), this, SLOT(boutonArriereDroitePressed()));
         QObject::connect(boutonArriereDroite, SIGNAL(released()), this, SLOT(boutonArriereDroiteReleased()));
 
+        QObject::connect(boutonCamUp, SIGNAL(clicked()), this, SLOT(boutonCamUpClicked()));
+        QObject::connect(boutonCamDown, SIGNAL(clicked()), this, SLOT(boutonCamDownClicked()));
+        QObject::connect(boutonCamLeft, SIGNAL(clicked()), this, SLOT(boutonCamLeftClicked()));
+        QObject::connect(boutonCamRight, SIGNAL(clicked()), this, SLOT(boutonCamRightClicked()));
         QObject::connect(boutonCapture, SIGNAL(clicked()), this, SLOT(boutonCaptureClicked()));
 
         /* Liaison de la modification des donnees du robot (dans le thread communication) avec l'update des labels */
@@ -261,6 +281,19 @@ void FenetrePrincipale::keyPressEvent(QKeyEvent *event)
 {
     switch(event->key())
     {
+    case Qt::Key_Z:
+        boutonCamUpClicked();
+        break;
+    case Qt::Key_S:
+        boutonCamDownClicked();
+        break;
+    case Qt::Key_Q:
+        boutonCamLeftClicked();
+        break;
+    case Qt::Key_D:
+        boutonCamRightClicked();
+        break;
+
     case Qt::Key_Up:
         keyUp = true;
         break;
@@ -369,6 +402,30 @@ void FenetrePrincipale::majCommandeFromFlags()
 /***************************
  * SLOTS : actions effectuees lorsqu'un evemenement a lieu
  ***************************/
+
+void FenetrePrincipale::boutonCamUpClicked()
+{
+    QUrl url("http://"+ip+":8080"+CAM_UP);
+    camControl->get(QNetworkRequest(url));
+}
+
+void FenetrePrincipale::boutonCamDownClicked()
+{
+    QUrl url("http://"+ip+":8080"+CAM_DOWN);
+    camControl->get(QNetworkRequest(url));
+}
+
+void FenetrePrincipale::boutonCamLeftClicked()
+{
+    QUrl url("http://"+ip+":8080"+CAM_LEFT);
+    camControl->get(QNetworkRequest(url));
+}
+
+void FenetrePrincipale::boutonCamRightClicked()
+{
+    QUrl url("http://"+ip+":8080"+CAM_RIGHT);
+    camControl->get(QNetworkRequest(url));
+}
 
 void FenetrePrincipale::boutonCaptureClicked()
 {
