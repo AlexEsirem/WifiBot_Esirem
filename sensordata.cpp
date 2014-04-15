@@ -24,21 +24,21 @@ void SensorData::setTensionBatterie(int value)
 {
     tensionBatterie = value;
 }
-int SensorData::getVitesseGauche() const
+double SensorData::getVitesseGauche() const
 {
     return vitesseGauche;
 }
 
-void SensorData::setVitesseGauche(int value)
+void SensorData::setVitesseGauche(double value)
 {
     vitesseGauche = value;
 }
-int SensorData::getVitesseDroite() const
+double SensorData::getVitesseDroite() const
 {
     return vitesseDroite;
 }
 
-void SensorData::setVitesseDroite(int value)
+void SensorData::setVitesseDroite(double value)
 {
     vitesseDroite = value;
 }

@@ -14,11 +14,11 @@ public:
     int getTensionBatterie() const;
     void setTensionBatterie(int value);
 
-    int getVitesseGauche() const;
-    void setVitesseGauche(int value);
+    double getVitesseGauche() const;
+    void setVitesseGauche(double value);
 
-    int getVitesseDroite() const;
-    void setVitesseDroite(int value);
+    double getVitesseDroite() const;
+    void setVitesseDroite(double value);
 
     int getIRgauche() const;
     void setIRgauche(int value);
@@ -43,8 +43,8 @@ public:
 
 private:
     int tensionBatterie;
-    int vitesseGauche;
-    int vitesseDroite;
+    double vitesseGauche;
+    double vitesseDroite;
     int IRgauche;
     int IRgauche2;
     int IRdroit;

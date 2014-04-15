@@ -20,8 +20,6 @@ extern int commande;
  * @brief The ThreadCommunication class
  * Le thread de communication effectue toutes les actions concernant l'envoi et la reception de donnees au robot.
  * Il calcule egalement les vitesses et directions à appliquer au robot en fonction de la commande actuelle.
- * Un appui prolongé sur un bouton provoque une accélération. C'est-à-dire que si l'utilisateur reste appuyé sur la flèche
- * du haut (avancer) pendant un moment, le robot ira en avant avec une vitesse de plus en plus grande.
  */
 class ThreadCommunication : public QThread
 {

@@ -127,7 +127,7 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
 
         QFrame *frameWeb = new QFrame(this);
         QGridLayout *layoutWeb = new QGridLayout;
-        layoutWeb->addWidget(pageWeb);
+        layoutWeb->addWidget(pageWeb, 0,0,Qt::AlignHCenter|Qt::AlignVCenter);
         layoutWeb->setContentsMargins(0,0,0,0);
         frameWeb->setLayout(layoutWeb);
         frameWeb->setObjectName("panel");
@@ -135,7 +135,6 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         /* Désactivation de la barre de défilement  de la page web : */
         pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
         pageWeb->page()->mainFrame()->setScrollBarPolicy(Qt::Vertical, Qt::ScrollBarAlwaysOff);
-        pageWeb->page()->mainFrame()->setZoomFactor(1.6);
 
         /* On utilisera 4 layouts :
          * - Un principal qui contiendra tous les éléments
@@ -214,13 +213,13 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         layoutDroite->addWidget(boutonQuitter, 4, 1, Qt::AlignBottom|Qt::AlignRight);
 
         panelData->setMinimumWidth(2*panelCommandes->sizeHint().width()+20);
-        frameWeb->setMinimumWidth(1.7*320);
-        frameWeb->setMaximumHeight(1.8*240);
+        frameWeb->setMinimumWidth(320);//*1.7
+        frameWeb->setMaximumHeight(240);//*1.8
 
         //frameWeb->setMinimumWidth((4/3)*frameWeb->sizeHint().height());
 
         layoutPrincipal->addLayout(layoutDroite, 0,1);
-        layoutPrincipal->addWidget(frameWeb, 0,0, Qt::AlignTop|Qt::AlignLeft);
+        layoutPrincipal->addWidget(frameWeb, 0,0, Qt::AlignVCenter|Qt::AlignHCenter);
 
         /* Application du layout à cette fenêtre */
         this->setLayout(layoutPrincipal);
@@ -452,12 +451,12 @@ void FenetrePrincipale::boutonCaptureClicked()
 void FenetrePrincipale::updateDataLabels()
 {
     SensorData *capteurs = tCommunication->getCapteurs();
-    labelVitesseGauche->setText("Gauche : " + QString::number(capteurs->getVitesseGauche(), 10));
-    labelVitesseDroite->setText("Droite : " + QString::number(capteurs->getVitesseDroite(), 10));
-    labelIRDroit->setText("Droite : " + QString::number(capteurs->getIRdroit(), 10));
-    labelIRDroit2->setText("Droite 2 : " + QString::number(capteurs->getIRdroit2(), 10));
-    labelIRGauche->setText("Gauche : " + QString::number(capteurs->getIRgauche(), 10));
-    labelIRGauche2->setText("Gauche 2 : " + QString::number(capteurs->getIRgauche2(), 10));
+    labelVitesseGauche->setText("Gauche : " + QString::number(capteurs->getVitesseGauche()));
+    labelVitesseDroite->setText("Droite : " + QString::number(capteurs->getVitesseDroite()));
+    labelIRDroit->setText("Droite Av : " + QString::number(capteurs->getIRdroit(), 10));
+    labelIRDroit2->setText("Droite Arr : " + QString::number(capteurs->getIRdroit2(), 10));
+    labelIRGauche->setText("Gauche Av: " + QString::number(capteurs->getIRgauche(), 10));
+    labelIRGauche2->setText("Gauche Arr : " + QString::number(capteurs->getIRgauche2(), 10));
     labelTensionBatterie->setText("Batterie : " + QString::number(capteurs->getTensionBatterie(), 10));
     labelCourant->setText("Courant : " + QString::number(capteurs->getCourant(), 10));
 }

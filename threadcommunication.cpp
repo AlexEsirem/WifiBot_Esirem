@@ -162,16 +162,21 @@ void ThreadCommunication::run(){
 
             readData();
 
-            msleep(50); // sleep 50 ms.
+            msleep(T_DELAY); // en ms
         }
 
     }
     // si on arrive ici c'est que termine est a true.
     // on ferme le socket et ce thread se terminera.
+    printf("Deconnexion");
     socket->disconnectFromHost();
     // si le socket ne se ferme pas tout de suite on attend sa deconnexion 5 secondes max.
     if (socket->state() != QAbstractSocket::UnconnectedState)
         socket->waitForDisconnected(SOCK_TIMEOUT);
+    if(socket->state() != QAbstractSocket::UnconnectedState)
+        printf("Erreur socket");
+    else
+        printf("Bien déconnecté");
 }
 
 /**
@@ -359,14 +364,16 @@ void ThreadCommunication::readData()
         socket->read(bufferReception, 21);
 
         // Vitesse gauche *(-1) car elle est inversée
-        int vitGauche = (int)((bufferReception[1]>>8) + bufferReception[0])*(-1);
-        if(vitGauche > 32767)
-            vitGauche = vitGauche - 65536;
-        int vitDroite = (int)((bufferReception[10]>>8) + bufferReception[9])*(-1);
-        if(vitDroite > 32767)
-            vitDroite = vitDroite - 65536;
-        capteurs->setVitesseGauche(vitGauche);
-        capteurs->setVitesseDroite(vitDroite);
+        // vitesse en tics/50ms
+        // 140ticks/50ms = 0.5m/S
+        int vGauche = (int)((bufferReception[1]<<8) + bufferReception[0])*(-1);
+        if(vGauche > 32767)
+            vGauche = vGauche - 65536;
+        capteurs->setVitesseGauche(vGauche*0.02); // Conversion en km/h
+        int vDroite = (int)((bufferReception[10]<<8) + bufferReception[9])*(-1);
+        if(vDroite > 32767)
+            vDroite = vDroite - 65536;
+        capteurs->setVitesseDroite(vDroite*0.02); // km/h
         capteurs->setTensionBatterie((int)bufferReception[2]);
         capteurs->setIRgauche((int)bufferReception[3]);
         capteurs->setIRgauche2((int)bufferReception[4]);

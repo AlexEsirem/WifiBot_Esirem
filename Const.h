@@ -21,6 +21,9 @@
 /* Constante de timeout, en millisecondes (temps max d'attente pour la connexion du socket) */
 #define SOCK_TIMEOUT 2000
 
+/* Temps entre 2 envois /receptions de données par le thread sur le socket */
+#define T_DELAY 50 // en ms
+
 /* Constantes qui indiquent une commande */
 #define RIEN 0
 #define FREIN 1
