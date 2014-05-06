@@ -104,10 +104,21 @@ void ThreadCommunication::run(){
 
                 // Cote gauche :
                 bufferEnvoi[2] = vGauche; // vérifier à quoi sert celui-ci
-                bufferEnvoi[3] = 0;
+                if(commande == AVANCER
+                        || commande == RECULER
+                        || commande == PIVOTER_DROITE
+                        || commande == PIVOTER_GAUCHE)
+                {
+                    bufferEnvoi[3] = vGauche;
+                    bufferEnvoi[5] = vDroite;
+                }
+                else
+                {
+                    bufferEnvoi[3] = 0;
+                    bufferEnvoi[5] = 0;
+                }
                 // Cote droit :
                 bufferEnvoi[4] = vDroite; // vérifier à quoi sert celui-ci
-                bufferEnvoi[5] = 0;
 
                 // Définition du flag de commande :
                 int commandFlag = 0;
@@ -173,10 +184,6 @@ void ThreadCommunication::run(){
     // si le socket ne se ferme pas tout de suite on attend sa deconnexion 5 secondes max.
     if (socket->state() != QAbstractSocket::UnconnectedState)
         socket->waitForDisconnected(SOCK_TIMEOUT);
-    if(socket->state() != QAbstractSocket::UnconnectedState)
-        printf("Erreur socket");
-    else
-        printf("Bien déconnecté");
 }
 
 /**
@@ -260,12 +267,12 @@ void ThreadCommunication::calculVitesses(int *vGauche, int *vDroite, int vMax)
             || commande == ARRIERE_DROIT)
     {
             (*vGauche) = vMax;
-            (*vDroite) = vMax/4;
+            (*vDroite) = (int)(vMax/6);
     }
     else if(commande == AVANT_GAUCHE
             || commande == ARRIERE_GAUCHE)
     {
-            (*vGauche) = vMax/4;
+            (*vGauche) = (int)(vMax/6);
             (*vDroite) = vMax;
     }
     else

@@ -109,10 +109,10 @@ FenetrePrincipale::FenetrePrincipale(QString ipRobot, int portRobot) : QWidget()
         labelVitesseDroite->setText("Droite :");
         labelTensionBatterie->setText("Batterie :");
         labelIR->setText("Infrarouges");
-        labelIRGauche->setText("Gauche :");
-        labelIRGauche2->setText("Gauche 2 :");
-        labelIRDroit->setText("Droite :");
-        labelIRDroit2->setText("Droite 2 :");
+        labelIRGauche->setText("Gauche Av :");
+        labelIRGauche2->setText("Gauche Ar :");
+        labelIRDroit->setText("Droite Av :");
+        labelIRDroit2->setText("Droite Ar :");
         labelCourant->setText("Courant :");
         labelAutres->setText("Autres");
 
@@ -453,8 +453,8 @@ void FenetrePrincipale::updateDataLabels()
     SensorData *capteurs = tCommunication->getCapteurs();
     labelVitesseGauche->setText("Gauche : " + QString::number(capteurs->getVitesseGauche()));
     labelVitesseDroite->setText("Droite : " + QString::number(capteurs->getVitesseDroite()));
-    labelIRDroit->setText("Droite Av : " + QString::number(capteurs->getIRdroit(), 10));
-    labelIRDroit2->setText("Droite Arr : " + QString::number(capteurs->getIRdroit2(), 10));
+    labelIRDroit->setText("Droite Av : " + QString::number(capteurs->getIRdroit2(), 10));
+    labelIRDroit2->setText("Droite Arr : " + QString::number(capteurs->getIRdroit(), 10));
     labelIRGauche->setText("Gauche Av: " + QString::number(capteurs->getIRgauche(), 10));
     labelIRGauche2->setText("Gauche Arr : " + QString::number(capteurs->getIRgauche2(), 10));
     labelTensionBatterie->setText("Batterie : " + QString::number(capteurs->getTensionBatterie(), 10));
